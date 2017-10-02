@@ -130,17 +130,99 @@ var route_user_username = function(method, req, res, next){
         return;
       }
     } else { // results.length == 0
-      // remove sensitive information
-      var user = results[0];
-      delete user['pass'];
-      // user is not -owner-
-      if (user.username != req.params.username || req.body.key  != user.key) {
-        delete user['key'];
-        delete user['email'];
-      }
+      var rq = req.body;
 
-      // send -safe- data
-      send(res, config.e.E_OK, user);
+      if ( rq.key && (rq.pass || rq.displayname || rq.displaydesc || rq.email)) {
+        var user = {
+          username: req.params.username,
+          key: req.body.key
+        };
+
+        /* check key validity */
+        var q = mysql.format(
+          'select * from ?? where ?? = ? and ?? = ?',
+          [
+            config.db.tables['user'],
+            'username', user.username,
+            'key', user.key
+          ]
+        );
+        query(res, q, function(err, results, fields) {
+          if (err) {
+            send(res, config.e.E_DBFAIL, {
+              msg: "create new user fail. error code: " + err.code
+            });
+            return;
+          }
+
+          if (results.length == 0) {
+            errexit(res, config.e.E_AUTH_FAILURE);
+            return;
+          }
+
+          var dbres = results[0];
+          user['pass'] = dbres.pass;
+          user['display'] = {
+            name: dbres['displayname'],
+            desc: dbres['displaydesc']
+          };
+          user['email'] = dbres.email;
+
+          if (rq.pass) {
+            user['pass'] = bcrypt.hashSync(rq.pass, config.db.rounds);
+          }
+
+          if (rq.displayname) {
+            user['display'].name = rq.displayname;
+          }
+
+          if (rq.displaydesc) {
+            user['display'].desc = rq.displaydesc;
+          }
+
+          if (rq.email) {
+            user['email'] = rq.email;
+          }
+
+          var q = mysql.format(
+            'update ?? set ?? = ?, ?? = ?, ?? = ?, ?? = ? where ?? = ? and ?? = ?',
+            [
+              config.db.tables['user'],
+              'pass', user.pass,
+              'displayname', user.display.name,
+              'displaydesc', user.display.desc,
+              'email', user.email,
+              'username', user.username,
+              'key', user.key
+            ]
+          );
+          query(res, q, function(err, results, fields) {
+            if (err){
+              errexit(config.e.E_DBFAIL);
+              return;
+            }
+
+            /* query update, and send resp */
+            if (results.affectedRows == 1) {
+              send(res, config.e.E_OK, user);
+            } else {
+              errexit(res, config.e.E_SHOULD_NOT_HAPPEN);
+            }
+          }); // query - update info
+        }); // query - check key validity
+      } else { // key && (rq.{pass|displayname|displaydesc|email})
+        // remove sensitive information
+        var user = results[0];
+        delete user['pass'];
+        // user is not -owner-
+        if (user.username != req.params.username || req.body.key  != user.key) {
+          delete user['key'];
+          delete user['email'];
+        }
+
+        // send -safe- data
+        send(res, config.e.E_OK, user);
+      }
     } // results.length == 1 /
   }); // query
 }; // route_user_username
@@ -212,7 +294,8 @@ var route_user_username_auth = function(req, res, next) {
       }
 
       send(res, config.e.E_OK, {
-        msg: "login success"
+        msg: "login success",
+        key: key
       });
     });
   }); // query
