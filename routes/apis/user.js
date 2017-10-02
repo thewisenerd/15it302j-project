@@ -338,7 +338,7 @@ var route_user_username_purge = function(req, res, next) {
       );
       helpers.query(res, q, function(err, results, fields) {
         if (err){
-          helpers.errexit(config.e.E_DBFAIL);
+          helpers.errexit(res, config.e.E_DBFAIL);
           return;
         }
 

@@ -14,5 +14,25 @@ create table `writr_users` (
   primary key (`username`)
 );
 
+drop table if exists `writr_categories`;
+create table `writr_categories` (
+  `categoryid` int not null auto_increment,
+  `name` varchar(64) unique not null,
+  `order` int not null default '99999',
+  primary key (`categoryid`)
+);
+
+drop table if exists `writr_articles`;
+create table `writr_articles` (
+  `articleid` int not null auto_increment,
+  `categoryid` int not null,
+  `title` text not null,
+  `author` varchar(64) not null,
+  `content` longtext not null,
+  `date` datetime default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `isdraft` boolean not null default 1,
+  primary key (`articleid`)
+
+);
 
 /* sample data? */
