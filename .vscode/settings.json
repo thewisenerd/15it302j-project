@@ -4,5 +4,6 @@
     "editor.tabCompletion": true,
     "editor.insertSpaces": true,
     "files.trimTrailingWhitespace": true,
-    "files.insertFinalNewline": true
+    "files.insertFinalNewline": true,
+    "editor.rulers": [80, 120]
 }
