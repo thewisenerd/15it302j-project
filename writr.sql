@@ -61,7 +61,7 @@ create table `writr_comments` (
 INSERT INTO `writr_categories` VALUES (1,'General',1);
 INSERT INTO `writr_users` VALUES
   ('editor','$2a$04$OhZlm0BhV43U8VKTrsUoyeT6hhoCr23LRxnhjUH1tnf/5BeZn6F5C','d8d2f1a46829e33c552f2615e89ab73eea487033e6ee0b000b721aee27ad6ab6ec788fae66e9b3c5ee3ee589de10673fae20e2ef32905b9d71cc04df27fd52bc','E','Editor Doe','<i>editor. more or less.</i>','editor@email.com'),
-  ('dummy','$2a$04$OhZlm0BhV43U8VKTrsUoyeT6hhoCr23LRxnhjUH1tnf/5BeZn6F5C','d8d2f1a46829e33c552f2615e89ab73eea487033e6ee0b000b721aee27ad6ab6ec788fae66e9b3c5ee3ee589de10673fae20e2ef32905b9d71cc04df27fd52bc','W','Dummy Doe','<i>dummy. more or less.</i>','dummy@email.com');
+  ('dummy','$2a$04$OhZlm0BhV43U8VKTrsUoyeT6hhoCr23LRxnhjUH1tnf/5BeZn6F5C','e77491b9889a5b5875701fd4d848452cf9d5d3ab4b15776a1e23424a128ed88f8e71249cee987978dba121c1f35d7419b2f3066366be8aca0aa1add8e5f6ce8b','W','Dummy Doe','<i>dummy. more or less.</i>','dummy@email.com');
 INSERT INTO `writr_articles` VALUES
   (2,1,'dummy title','editor','dummy content','2017-10-03 10:05:19',0),
   (3,1,'dummy title','dummy','dummy content','2017-10-03 09:44:17',1),
