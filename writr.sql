@@ -44,6 +44,19 @@ create table `writr_featured` (
   foreign key (`articleid`) references `writr_articles`(`articleid`)
 );
 
+drop table if exists `writr_comments`;
+create table `writr_comments` (
+  `commentid` bigint not null auto_increment,
+  `articleid` int not null,
+  `message` text not null,
+  `parent` int not null,
+  `author` varchar(64) not null,
+  `date` datetime default CURRENT_TIMESTAMP,
+  primary key (`commentid`),
+  foreign key (`articleid`) references `writr_articles`(`articleid`),
+  foreign key (`author`) references `writr_users`(`username`)
+);
+
 /* sample data? */
 INSERT INTO `writr_categories` VALUES (1,'General',1);
 INSERT INTO `writr_users` VALUES
@@ -54,3 +67,6 @@ INSERT INTO `writr_articles` VALUES
   (3,1,'dummy title','dummy','dummy content','2017-10-03 09:44:17',1),
   (4,1,'dummy title','dummy','dummy content','2017-10-03 09:45:52',0),
   (7,1,'dummy title','dummy','dummy content','2017-10-03 10:03:40',1);
+INSERT INTO `writr_featured` VALUES
+  (2,6),
+  (4,5);

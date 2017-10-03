@@ -5,6 +5,7 @@ var user = require('./apis/user');
 var categories = require('./apis/categories');
 var articles = require('./apis/articles');
 var featured = require('./apis/featured');
+var comments = require('./apis/comments');
 
 var helpers = require('./api-helpers');
 
@@ -28,5 +29,6 @@ router.use('/', user);
 router.use('/', categories);
 router.use('/', articles);
 router.use('/', featured);
+router.use('/', comments);
 
 module.exports = router;

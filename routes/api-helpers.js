@@ -21,10 +21,10 @@ module.exports.errexit = function(res, error) {
 /**
  * callback(err, results, fields)
  */
-module.exports.query = function(res, query, callback) {
+module.exports.query = function(res, query, callback, data = null) {
   pool.getConnection(function(err, conn) {
     if (err) {
-      callback(err, null, null);
+      callback(err, null, null, data);
       return;
     }
 
@@ -32,11 +32,11 @@ module.exports.query = function(res, query, callback) {
       conn.release();
 
       if (err) {
-        callback(err, null, null);
+        callback(err, null, null, data);
         return;
       }
 
-      callback(err, results, fields);
+      callback(err, results, fields, data);
     });
   });
 };
@@ -106,4 +106,114 @@ module.exports.getarticle = function(req, res, next, articleid, callback, data =
 
     callback(req, res, next, null, results[0]);
   });
+};
+
+/**
+ * callback: function(req, res, next, err, thread, data)
+ */
+module.exports.buildcommentthread = function(req, res, next, articleid, commentid, callback, data = null){
+  var q = mysql.format(
+    'select * from ?? where ?? = ?',
+    [
+      config.db.tables['comments'],
+      'articleid', articleid
+    ]
+  );
+
+  module.exports.query(res, q, function(err, results, fields, data){
+    if (err) {
+      callback(req, res, next, err, null, data);
+      return;
+    }
+
+    var tree = {};
+    var mktree = function( tree, children, parent ) {
+      var orphans = [];
+      children.forEach(function(comment) {
+        if (comment.parent == parent) {
+          comment['children'] = {};
+          tree[comment.commentid] = comment;
+        } else {
+          orphans.push(comment);
+        }
+      });
+
+      for (commentid in tree) {
+        mktree(tree[commentid]['children'], orphans, commentid);
+      }
+    };
+    mktree(tree, results.slice(), 0);
+
+    var thread = [];
+    var mkthread = function(parent, tree) {
+      for (commentid in tree) {
+        parent.push(tree[commentid]);
+      }
+      parent.sort(function(a, b) {
+        return b.date - a.date
+      });
+
+      parent.forEach(function(comment) {
+        if (Object.keys(comment['children']).length) {
+          var child = [];
+          mkthread(child, comment['children']);
+          comment['children'] = child;
+        } else {
+          delete comment['children'];
+        }
+      });
+    };
+    mkthread(thread, tree);
+
+    if (data.commentid) {
+      var search = function(thread, s) {
+        for (var i = 0; i < thread.length; i++) {
+          var comment = thread[i];
+          if (comment.commentid == s) {
+            return comment;
+          } else {
+            if (comment.children) {
+              return search(comment.children, s);
+            }
+          }
+        }; // for comment in thread
+        return [];
+      };
+      callback(req, res, next, null, search(thread, data.commentid), data.data);
+    } else {
+      callback(req, res, next, null, thread, data.data);
+    }
+  }, {
+    articleid: articleid,
+    commentid: commentid,
+    data: data
+  }); // query - select * from comments where ?? = ?
+};
+
+/**
+ * callback: function(req, res, next, err, comment, data)
+ */
+module.exports.getcomment = function(req, res, next, articleid, commentid, callback, data = null) {
+  var q = mysql.format(
+    'select * from ?? where ?? = ? and ?? = ?',
+    [
+      config.db.tables['comments'],
+      'articleid', articleid,
+      'commentid', commentid
+    ]
+  );
+
+  module.exports.query(res, q, function(err, results, fields, data) {
+    if (err){
+      callback(req, res, next, err, null, data);
+      return;
+    }
+
+    if (results.length == 0) {
+      callback(req, res, next, config.e.E_WRONG_PARAMETERS, null, data);
+      return;
+    }
+
+    callback(req, res, next, null, results[0], data);
+  }, data);
 };
