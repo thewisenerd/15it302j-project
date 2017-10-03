@@ -3,6 +3,7 @@ var router = express.Router();
 
 var user = require('./apis/user.js');
 var categories = require('./apis/categories.js');
+var articles = require('./apis/articles.js');
 
 var helpers = require('./api-helpers');
 
@@ -24,5 +25,6 @@ router.get('/info/mysql', function(req, res, next) {
 
 router.use('/', user);
 router.use('/', categories);
+router.use('/', articles);
 
 module.exports = router;

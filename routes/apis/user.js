@@ -68,7 +68,11 @@ var route_user_username = function(method, req, res, next){
             return;
           }
 
-          helpers.send(res, config.e.E_OK, results);
+          if (results.affectedRows) {
+            helpers.errexit(res, config.e.E_OK);
+          } else {
+            helpers.errexit(res, config.e.E_SHOULD_NOT_HAPPEN);
+          }
         });
       } else {
       /* this is an empty helpers.query, not trying to make a new user. */
@@ -97,14 +101,12 @@ var route_user_username = function(method, req, res, next){
         );
         helpers.query(res, q, function(err, results, fields) {
           if (err) {
-            helpers.send(res, config.e.E_DBFAIL, {
-              msg: "create new user fail. error code: " + err.code
-            });
+            helpers.errexit(res, config.e.E_DBFAIL);
             return;
           }
 
           if (results.length == 0) {
-            helpers.errexit(res, config.e.E_AUTH_FAILURE);
+            helpers.errexit(res, config.e.E_KEY_FAILURE);
             return;
           }
 
@@ -152,6 +154,10 @@ var route_user_username = function(method, req, res, next){
 
             /* helpers.query update, and helpers.send resp */
             if (results.affectedRows == 1) {
+
+              // remove user pass
+              delete user['pass'];
+
               helpers.send(res, config.e.E_OK, user);
             } else {
               helpers.errexit(res, config.e.E_SHOULD_NOT_HAPPEN);
@@ -163,10 +169,18 @@ var route_user_username = function(method, req, res, next){
         var user = results[0];
         delete user['pass'];
         // user is not -owner-
-        if (user.username != req.params.username || req.body.key  != user.key) {
+        if (user.username != req.params.username || (! rq.key) || (req.body.key != user.key)  ) {
           delete user['key'];
           delete user['email'];
         }
+
+        user['display'] = {
+          name: user['displayname'],
+          desc: user['displaydesc']
+        };
+
+        delete user['displayname'];
+        delete user['displaydesc'];
 
         // helpers.send -safe- data
         helpers.send(res, config.e.E_OK, user);
@@ -224,6 +238,7 @@ var route_user_username_auth = function(req, res, next) {
     }
 
     /* generate key, insert into db. */
+    // TODO: regen until key not found in db
     var key = crypto.randomBytes(64).toString('hex');
     var q = mysql.format(
       'update ?? set ?? = ? where ?? = ?',

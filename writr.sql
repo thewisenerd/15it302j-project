@@ -31,8 +31,13 @@ create table `writr_articles` (
   `content` longtext not null,
   `date` datetime default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   `isdraft` boolean not null default 1,
-  primary key (`articleid`)
-
-);
+  primary key (`articleid`),
+  foreign key (`categoryid`) references `writr_categories`(`categoryid`),
+  foreign key (`author`) references `writr_users`(`username`)
+) auto_increment=1;
 
 /* sample data? */
+INSERT INTO `writr_categories` VALUES (1,'General',1);
+INSERT INTO `writr_users` VALUES
+  ('editor','$2a$04$OhZlm0BhV43U8VKTrsUoyeT6hhoCr23LRxnhjUH1tnf/5BeZn6F5C','d8d2f1a46829e33c552f2615e89ab73eea487033e6ee0b000b721aee27ad6ab6ec788fae66e9b3c5ee3ee589de10673fae20e2ef32905b9d71cc04df27fd52bc','E','Editor Doe','<i>editor. more or less.</i>','editor@email.com'),
+  ('dummy','$2a$04$OhZlm0BhV43U8VKTrsUoyeT6hhoCr23LRxnhjUH1tnf/5BeZn6F5C','d8d2f1a46829e33c552f2615e89ab73eea487033e6ee0b000b721aee27ad6ab6ec788fae66e9b3c5ee3ee589de10673fae20e2ef32905b9d71cc04df27fd52bc','W','Dummy Doe','<i>dummy. more or less.</i>','dummy@email.com');

@@ -26,6 +26,8 @@ router.route('/categories')
 
 }).post(function(req, res, next) {
 
+  // TODO: check if user is editor here.
+
   var err = false;
   if (Array.isArray(req.body)) {
     if (req.body.length > 0) {
@@ -112,6 +114,8 @@ var route_categories_category = function(req, res, next) {
       helpers.send(res, config.e.E_OK, results);
       return;
     }
+
+    // TODO: check if any user has logged in here.
 
     var category = req.params.category;
     var q = mysql.format(
