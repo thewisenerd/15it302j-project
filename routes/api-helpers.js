@@ -1,90 +1,150 @@
-var pool = require('../mysql-wrapper');
+var bcrypt = require('bcrypt')
 var mysql = require('mysql')
-var config = require('../config')
 
-module.exports.send = function(res, error, data) {
+var config = require('../config')
+var pool = require('../mysql-wrapper');
+
+/**
+ * res
+ * err
+ * data
+ */
+module.exports.send = (res, err, data) => {
   res.send({
-    status: error[0],
+    status: err[0],
     data: data
   });
-};
+}; // module.exports.send
 
-module.exports.errexit = function(res, error) {
+module.exports.errexit = (res, err, error = null) => {
   res.send({
-    status: error[0],
+    status: err[0],
     data: {
-      "msg": error[1]
+      "msg": err[1]
     }
   });
-};
+
+  if (error) {
+    console.log(error);
+  }
+}; // module.exports.errexit
 
 /**
- * callback(err, results, fields)
+ *  query
+ *  callback function(err, results, fields)
  */
-module.exports.query = function(res, query, callback, data = null) {
-  pool.getConnection(function(err, conn) {
+module.exports.query = (query, callback) => {
+  pool.getConnection( (err, conn) => {
     if (err) {
-      callback(err, null, null, data);
-      return;
+      return callback(err, null, null);
     }
 
-    conn.query(query, function(err, results, fields) {
+    conn.query(query, (error, results, fields) => {
       conn.release();
 
-      if (err) {
-        callback(err, null, null, data);
-        return;
-      }
-
-      callback(err, results, fields, data);
+      callback(error, results, fields);
     });
   });
-};
+}; // module.exports.query
 
 /**
- * callback(req, res, next, err, auth, user)
- * err = err
- * auth = true|false
- * data = data
+ * key
+ * callback function(err, auth, user)
+ * auth: bool
  */
-module.exports.authenticate = function(req, res, next, callback, data = null) {
-  if ( ! req.body.key) {
-    callback(req, res, next, config.e.E_WRONG_PARAMETERS, false, null, data);
-    return;
+module.exports.authenticate = (key, callback) => {
+  if ( ! key ) {
+    return callback(config.e.E_WRONG_PARAMETERS, false, null);
   }
 
-  if ( req.body.key.length != 128 ) {
-    callback(req, res, next, config.e.E_WRONG_PARAMETERS, false, null, data);
-    return;
+  if ( key.length != 128 ) {
+    return callback(config.e.E_WRONG_PARAMETERS, false, null);
   }
 
   var q = mysql.format(
     'select * from ?? where ?? = ?',
     [
       config.db.tables['user'],
-      'key', req.body.key
+      'key', key
     ]
   );
-  module.exports.query(res, q, function(err, results, fields) {
+
+  module.exports.query(q, (err, results, fields) => {
     if (err) {
-      callback(req, res, next, config.e.E_DBFAIL, false, null, data);
-      return;
+      return callback(config.e.E_DBFAIL, false, null);
     }
 
     if (results.length == 0) {
-      callback(req, res, next, null, false, null, data);
-      return;
+      return callback(config.e.E_KEY_FAILURE, false, null);
     }
 
-    var user = results[0];
-    callback(req, res, next, null, true, user, data);
+    callback(null, true, results[0]);
+  });
+}; // module.exports.authenticate
+
+/**
+ * req
+ * callback function(err, auth, user)
+ * auth: bool
+ */
+module.exports.authenticatepass = (username, pass, callback) => {
+  if (!username || !pass) {
+    return callback(config.e.E_WRONG_PARAMETERS, false, null);
+  }
+
+  var q = mysql.format(
+    'select * from ?? where ?? = ?',
+    [
+      config.db.tables['user'],
+      'username', username,
+    ]
+  );
+
+  module.exports.query(q, (err, results, fields) => {
+    if (err) {
+      return callback(config.e.E_DBFAIL, false, null);
+    }
+
+    /* this is an invalid user. */
+    if (results.length == 0) {
+      return callback(config.e.E_WRONG_PARAMETERS, false, null);
+    }
+
+    if (!bcrypt.compareSync(pass, results[0].pass)) {
+      return callback(config.e.E_AUTH_FAILURE, false, null);
+    }
+
+    return callback(null, true, results[0]);
   });
 };
 
 /**
- * callback(req, res, next, err, article)
+ * username
+ * callback function(err)
  */
-module.exports.getarticle = function(req, res, next, articleid, callback, data = null) {
+module.exports.purgekey = (username, callback) => {
+  var q = mysql.format(
+    'update ?? set ?? = ? where ?? = ?',
+    [
+      config.db.tables['user'],
+      'key', null,
+      'username', username
+    ]
+  );
+  module.exports.query(q, (err, results, fields) => {
+    if (err){
+      return callback(err);
+    }
+
+    callback(null);
+  });
+}; // module.exports.purgekey
+
+/**
+ * articleid
+ * callback function(err, article)
+ */
+module.exports.getarticle = (articleid, callback) => {
   var q = mysql.format(
     'select * from ?? where ?? = ?;',
     [
@@ -93,25 +153,25 @@ module.exports.getarticle = function(req, res, next, articleid, callback, data =
     ]
   );
 
-  module.exports.query(res, q, function(err, results, fields) {
-    if (err){
-      callback(req, res, next, err, null);
-      return;
+  module.exports.query(q, (err, results, fields) => {
+    if (err) {
+      return callback(err, null);
     }
 
     if (results.length == 0) {
-      callback(req, res, next, config.e.E_INT_ARTICLE_DOES_NOT_EXIST, null);
-      return;
+      return callback(config.e.E_INT_ARTICLE_DOES_NOT_EXIST, null);
     }
 
-    callback(req, res, next, null, results[0]);
+    callback(null, results[0]);
   });
-};
+}; // module.exports.getarticle
 
 /**
- * callback: function(req, res, next, err, thread, data)
+ * articleid
+ * commentid = null
+ * callback function(err, thread)
  */
-module.exports.buildcommentthread = function(req, res, next, articleid, commentid, callback, data = null){
+module.exports.buildcommentthread = function(articleid, commentid = null, callback){
   var q = mysql.format(
     'select * from ?? where ?? = ?',
     [
@@ -120,10 +180,10 @@ module.exports.buildcommentthread = function(req, res, next, articleid, commenti
     ]
   );
 
-  module.exports.query(res, q, function(err, results, fields, data){
+  module.exports.query(q, ((argcommentid) =>
+  (err, results, fields) => {
     if (err) {
-      callback(req, res, next, err, null, data);
-      return;
+      return callback(err, null);
     }
 
     var tree = {};
@@ -165,35 +225,34 @@ module.exports.buildcommentthread = function(req, res, next, articleid, commenti
     };
     mkthread(thread, tree);
 
-    if (data.commentid) {
-      var search = function(thread, s) {
-        for (var i = 0; i < thread.length; i++) {
-          var comment = thread[i];
-          if (comment.commentid == s) {
-            return comment;
-          } else {
-            if (comment.children) {
-              return search(comment.children, s);
-            }
+    var search = function(thread, s) {
+      for (var i = 0; i < thread.length; i++) {
+        var comment = thread[i];
+        if (comment.commentid == s) {
+          return comment;
+        } else {
+          if (comment.children) {
+            return search(comment.children, s);
           }
-        }; // for comment in thread
-        return [];
-      };
-      callback(req, res, next, null, search(thread, data.commentid), data.data);
+        }
+      }; // for comment in thread
+      return [];
+    };
+
+    if (argcommentid) {
+      callback(null, search(thread, argcommentid));
     } else {
-      callback(req, res, next, null, thread, data.data);
+      callback(null, thread);
     }
-  }, {
-    articleid: articleid,
-    commentid: commentid,
-    data: data
-  }); // query - select * from comments where ?? = ?
-};
+  })(commentid)); // query - select * from comments where ?? = ?
+}; // module.exports.buildcommentthread
 
 /**
- * callback: function(req, res, next, err, comment, data)
+ * articleid
+ * commentid
+ * callback function(err, comment)
  */
-module.exports.getcomment = function(req, res, next, articleid, commentid, callback, data = null) {
+module.exports.getcomment = function(articleid, commentid, callback) {
   var q = mysql.format(
     'select * from ?? where ?? = ? and ?? = ?',
     [
@@ -203,17 +262,15 @@ module.exports.getcomment = function(req, res, next, articleid, commentid, callb
     ]
   );
 
-  module.exports.query(res, q, function(err, results, fields, data) {
-    if (err){
-      callback(req, res, next, err, null, data);
-      return;
+  module.exports.query(q, (err, results, fields) => {
+    if (err) {
+      return callback(err, null);
     }
 
     if (results.length == 0) {
-      callback(req, res, next, config.e.E_WRONG_PARAMETERS, null, data);
-      return;
+      return callback(config.e.E_WRONG_PARAMETERS, null);
     }
 
-    callback(req, res, next, null, results[0], data);
-  }, data);
-};
+    callback(null, results[0]);
+  }); // query - select * from comments where ?? = ? and ?? = ?
+}; // module.exports.getcomment

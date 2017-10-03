@@ -1,9 +1,10 @@
 var express = require('express');
 var router = express.Router();
 
-var helpers = require('../api-helpers');
 var mysql = require('mysql');
+
 var config = require('../../config');
+var helpers = require('../api-helpers');
 
 /**
  * threaded comm?
@@ -11,33 +12,25 @@ var config = require('../../config');
  *    - every :articleid will have comment thread
  *    - the root comment of :articleid will have parent 0
  *    - only GET /comments/:articleid will return all comments for article
- *      - {
- *          "commentid": {
+ *      - [
+ *          {
+ *            "commentid",
  *            "message",
  *            "author",
  *            "date",
  *            "children": [ { ... }, { ... }, ... ]
  *          },
  *          { ... }
- *        }
- *      - how tf? idk.
+ *        ]
  *    - POST /comments/:articleid will create a new comment
  *    - /:articleid/:commentid
  *      - GET: {comemntid, articleid, message, parent, author, date}
  *      - POST: if (key); { message }
- *
- *  A\
- *  B\
- *    C\
- *      D\
- *    E\
  */
-
 var route_comments_article = function(req, res, next) {
-  helpers.buildcommentthread(req, res, next, req.params.articleid, req.params.commentid, function(req, res, next, err, thread, data) {
+  helpers.buildcommentthread(req.params.articleid, req.params.commentid, (err, thread) => {
     if (err) {
-      helpers.errexit(res, err);
-      return;
+      return helpers.errexit(res, err, err);
     }
 
     helpers.send(res, config.e.E_OK, thread);
@@ -54,13 +47,12 @@ router.route('/comments/:articleid')
   }
 
   if (! req.body.key || ! req.body.comment) {
-    helpers.send(res, config.e.E_WRONG_PARAMETERS, {
+    return helpers.send(res, config.e.E_WRONG_PARAMETERS, {
       msg: "wrong parameters. send {key, comment}"
     });
-    return;
   }
 
-  helpers.getarticle(req, res, next, req.params.articleid, function(req, res, next, err, article) {
+  helpers.getarticle(req.params.articleid, (err, article) => {
 
     /* cannot comment on inexistent articles */
     if (err){
@@ -79,7 +71,7 @@ router.route('/comments/:articleid')
     }
 
     /* authenticate key, and insert comment */
-    helpers.authenticate(req, res, next, function(req, res, next, err, auth, user, data) {
+    helpers.authenticate(req.body.key, ((argarticle) => (err, auth, user) => {
       if (err) {
         helpers.errexit(res, err);
         return;
@@ -95,14 +87,13 @@ router.route('/comments/:articleid')
         [
           config.db.tables['comments'],
           'articleid', 'message', 'parent', 'author',
-          article.articleid, req.body.comment, 0, user.username
+          argarticle.articleid, req.body.comment, 0, user.username
         ]
       );
 
-      helpers.query(res, q, function(err, results, fields) {
+      helpers.query(q, (err, results, fields) => {
         if (err) {
-          helpers.errexit(res, config.e.E_DBFAIL);
-          return;
+          return helpers.errexit(res, config.e.E_DBFAIL, err);
         }
 
         if (results.affectedRows) {
@@ -113,7 +104,7 @@ router.route('/comments/:articleid')
           helpers.errexit(res, config.e.E_SHOULD_NOT_HAPPEN);
         }
       }); // query - insert into comments (??) values (?)
-    }, {article: article});
+    })(article)); // authenticate
   }); // getarticle
 }); // /comments/:articleid post
 
@@ -122,31 +113,26 @@ router.route('/comments/:articleid/:commentid')
   route_comments_article(req, res, next);
 }).post(function(req, res, next) {
   if (! req.body.key || ! req.body.comment) {
-    helpers.send(res, config.e.E_WRONG_PARAMETERS, {
+    return helpers.send(res, config.e.E_WRONG_PARAMETERS, {
       msg: "wrong parameters. send {key, comment}"
     });
-    return;
   }
 
-  helpers.authenticate(req, res, next, function(req, res, next, err, auth, user, data) {
+  helpers.authenticate(req.body.key, (err, auth, user) => {
     if (err) {
-      helpers.errexit(res, err);
-      return;
+      return helpers.errexit(res, err);
     }
     if (!auth) {
-      helpers.errexit(res, config.e.E_KEY_FAILURE);
-      return;
+      return helpers.errexit(res, config.e.E_KEY_FAILURE);
     }
 
-    helpers.getcomment(req, res, next, req.params.articleid, req.params.commentid, function(req, res, next, err, comment, data){
+    helpers.getcomment(req.params.articleid, req.params.commentid, ((arguser) => (err, comment) => {
       if (err) {
-        helpers.errexit(res, err);
+        return helpers.errexit(res, err, err);
         return;
       }
 
-      var user = data.user;
-
-      if (comment.author == user.username) {
+      if (comment.author == arguser.username || arguser.role == 'E') {
         /* if from owner of comment, it is an edit */
         var q = mysql.format(
           'update ?? set ?? = ? where ?? = ?',
@@ -157,10 +143,9 @@ router.route('/comments/:articleid/:commentid')
           ]
         );
 
-        helpers.query(res, q, function(err, results, fields) {
+        helpers.query(q, (err, results, fields) => {
           if (err) {
-            helpers.errexit(res, config.e.E_DBFAIL);
-            return;
+            return helpers.errexit(res, config.e.E_DBFAIL, err);
           }
 
           if (results.affectedRows) {
@@ -177,14 +162,13 @@ router.route('/comments/:articleid/:commentid')
           [
             config.db.tables['comments'],
             'articleid', 'message', 'parent', 'author',
-            req.params.articleid, req.body.comment, comment.commentid, user.username
+            req.params.articleid, req.body.comment, comment.commentid, arguser.username
           ]
         );
 
-        helpers.query(res, q, function(err, results, fields) {
+        helpers.query(q, (err, results, fields) => {
           if (err) {
-            helpers.errexit(res, config.e.E_DBFAIL);
-            return;
+            return helpers.errexit(res, config.e.E_DBFAIL, err);
           }
 
           if (results.affectedRows) {
@@ -196,8 +180,8 @@ router.route('/comments/:articleid/:commentid')
           }
         });
       } // comment is a reply
-    }, {user: user}); // getcomment
+    })(user)); // getcomment
   }); // authenticate
-});
+}); // POST: /comments/:articleid/:commentid
 
 module.exports = router;

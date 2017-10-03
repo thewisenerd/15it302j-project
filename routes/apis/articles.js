@@ -5,29 +5,29 @@ var helpers = require('../api-helpers');
 var mysql = require('mysql');
 var config = require('../../config');
 
-var route_get_articles = function(method, req, res, next) {
+var route_get_articles = (method, req, res, next) => {
   /* get request, no key set. return public articles. */
 
   var count = 10;
   var offset = 0;
 
   if (method == 'get') {
-    if (parseInt(req.query.count)) {
+    if (!isNaN(parseInt(req.query.count))) {
       count = parseInt(req.query.count);
     }
 
-    if (parseInt(req.query.offset)) {
+    if (!isNaN(parseInt(req.query.offset))) {
       offset = parseInt(req.query.offset);
     }
   } else { // method == 'post'
-    if (parseInt(req.body.count)) {
+    if (!isNaN(parseInt(req.body.count))) {
       count = parseInt(req.body.count);
     }
 
-    if (parseInt(req.body.offset)) {
+    if (!isNaN(parseInt(req.body.offset))) {
       offset = parseInt(req.body.offset);
     }
-  }
+  } // method == 'post'
 
   var q = mysql.format(
     'select ??, ??, ??, ??, ?? from ?? where ?? = ? limit ?,?;',
@@ -39,30 +39,29 @@ var route_get_articles = function(method, req, res, next) {
     ]
   );
 
-  helpers.query(res, q, function(err, results, fields) {
+  helpers.query(q, (err, results, fields) => {
     if (err){
-      helpers.errexit(res, config.e.E_DBFAIL);
-      return;
+      return helpers.errexit(res, config.e.E_DBFAIL, err);
     }
 
     helpers.send(res, config.e.E_OK, results);
   });
 };
 router.route('/articles')
-.get(function(req, res, next) {
+.get((req, res, next) => {
   route_get_articles('get', req, res, next);
 }).post(function(req,res,next) {
+
   /* post must have a key, else fall back to get. */
   if (! req.body.key) {
-    route_get_articles('post', req, res, next);
-    return;
+    return route_get_articles('post', req, res, next);
   }
 
-  helpers.authenticate(req, res, next, function(req, res, next, err, auth, user) {
+  helpers.authenticate(req.body.key, (err, auth, user) => {
     if (err) {
-      helpers.errexit(res, err);
-      return;
+      return helpers.errexit(res, err, err);
     }
+
     if (!auth) {
       helpers.errexit(res, config.e.E_KEY_FAILURE);
       return;
@@ -70,11 +69,11 @@ router.route('/articles')
 
     var count = 10;
     var offset = 0;
-    if (parseInt(req.body.count)) {
+    if (!isNaN(parseInt(req.body.count))) {
       count = parseInt(req.body.count);
     }
 
-    if (parseInt(req.body.offset)) {
+    if (!isNaN(parseInt(req.body.offset))) {
       offset = parseInt(req.body.offset);
     }
     var q = mysql.format(
@@ -86,44 +85,38 @@ router.route('/articles')
         offset, count
       ]
     );
-    helpers.query(res, q, function(err, results, fields) {
+    helpers.query(q, (err, results, fields) => {
       if (err){
-        console.log(err);
-        helpers.errexit(res, config.e.E_DBFAIL);
-        return;
+        return helpers.errexit(res, config.e.E_DBFAIL, err);
       }
 
-      console.log(results);
       helpers.send(res, config.e.E_OK, results);
     }); // select from articles where author = ?
   }); // authenticate
 }); // post /articles
-
 
 /**
  * /articles/:articleid
  */
 var route_get_articles_articleid = function(method, req, res, next) {
   if (req.params.articleid == 0) {
-    helpers.send(res, config.e.E_OK, {
+    return helpers.send(res, config.e.E_OK, {
       msg: "dummy article. POST with {key} to create new article."
     });
-    return;
   }
 
-  helpers.getarticle(req, res, next, req.params.articleid, function(req, res, next, err, article) {
+  helpers.getarticle(req.params.articleid, (err, article) => {
     if (err){
       if (config.e.E_INT_ARTICLE_DOES_NOT_EXIST) {
         helpers.errexit(res, config.e.E_WRONG_PARAMETERS);
       } else {
-        helpers.errexit(res, err);
+        helpers.errexit(res, err, err);
       }
       return;
     }
 
     if (article.isdraft) {
-      helpers.errexit(res, config.e.E_ACCESS);
-      return;
+      return helpers.errexit(res, config.e.E_ACCESS);
     }
     helpers.send(res, config.e.E_OK, article);
   });
@@ -138,32 +131,28 @@ router.route('/articles/:articleid')
     return;
   }
 
-  helpers.getarticle(req, res, next, req.params.articleid, function(req, res, next, err, article) {
+  helpers.getarticle(req.params.articleid, (err, article) => {
     var newarticle = false;
 
     if (err){
       if (err == config.e.E_INT_ARTICLE_DOES_NOT_EXIST) {
         newarticle = true;
       } else {
-        helpers.errexit(res, err);
-        return;
+        return helpers.errexit(res, err, err);
       }
     }
 
     /* authenticate */
-    helpers.authenticate(req, res, next, function(req, res, next, err, auth, user, data) {
+    helpers.authenticate(req.body.key, ( (argarticle, argnew) => (err, auth, user) => {
       if (err) {
-        helpers.errexit(res, err);
-        return;
+        return helpers.errexit(res, err, err);
       }
       if (!auth) {
         helpers.errexit(res, config.e.E_KEY_FAILURE);
         return;
       }
 
-      if (newarticle) {
-        /* new article */
-
+      if (argnew) {
         // check if id is zero
         if (req.params.articleid != 0) {
           helpers.send(res, config.e.E_WRONG_PARAMETERS, {
@@ -181,6 +170,7 @@ router.route('/articles/:articleid')
           return;
         }
 
+        // base article
         var article = {
           isdraft: 1,
           categoryid: 1,
@@ -190,8 +180,8 @@ router.route('/articles/:articleid')
         if (rq.isdraft) {
           article.isdraft = rq.isdraft;
         }
-        if (parseInt(req.query.categoryid)) {
-          article.categoryid == rq.categoryid;
+        if (!isNaN(parseInt(rq.categoryid))) {
+          article.categoryid == parseInt(rq.categoryid);
         }
 
         // sql query here
@@ -203,7 +193,7 @@ router.route('/articles/:articleid')
             article.isdraft, article.categoryid, article.title, user.username, article.content
           ]
         );
-        helpers.query(res, q, function(err, results, fields) {
+        helpers.query(q, (err, results, fields) => {
           if (err){
             helpers.errexit(res, config.e.E_DBFAIL);
             return;
@@ -216,16 +206,18 @@ router.route('/articles/:articleid')
           } else {
             helpers.errexit(res, config.e.E_SHOULD_NOT_HAPPEN);
           }
-        });
-      } else {
-        /* not a new article */
-        var article = data.article;
+        }); // insert into articles new article
+      } else { // newarticle
+        var article = argarticle;
 
         // check if we own the article.
-        if (article.author != user.username) {
-          helpers.errexit(res, config.e.E_ACCESS);
-          return;
+        if (user.role != 'E') {
+          if (article.author != user.username) {
+            helpers.errexit(res, config.e.E_ACCESS);
+            return;
+          }
         }
+
 
         // check parameters
         var rq = req.body;
@@ -263,7 +255,7 @@ router.route('/articles/:articleid')
           ]
         );
 
-        helpers.query(res, q, function(err, results, fields) {
+        helpers.query(q, (err, results, fields) => {
           if (err) {
             helpers.errexit(res, config.e.E_DBFAIL);
             return;
@@ -275,9 +267,9 @@ router.route('/articles/:articleid')
             helpers.errexit(res, config.e.E_SHOULD_NOT_HAPPEN);
           }
         }); // update set ?? = ? where ?? = ?
-      } // newarticle
-    }, {article: article}); // authenticate
+      } // not a new article
+    })(article, newarticle)); // authenticate
   }); // getarticle
-}); // post - /articles/:articleid
+}); // POST: /articles/:articleid
 
 module.exports = router;
