@@ -36,8 +36,21 @@ create table `writr_articles` (
   foreign key (`author`) references `writr_users`(`username`)
 ) auto_increment=1;
 
+drop table if exists `writr_featured`;
+create table `writr_featured` (
+  `articleid` int not null unique,
+  `order` int not null default '99999',
+  primary key (`articleid`),
+  foreign key (`articleid`) references `writr_articles`(`articleid`)
+);
+
 /* sample data? */
 INSERT INTO `writr_categories` VALUES (1,'General',1);
 INSERT INTO `writr_users` VALUES
   ('editor','$2a$04$OhZlm0BhV43U8VKTrsUoyeT6hhoCr23LRxnhjUH1tnf/5BeZn6F5C','d8d2f1a46829e33c552f2615e89ab73eea487033e6ee0b000b721aee27ad6ab6ec788fae66e9b3c5ee3ee589de10673fae20e2ef32905b9d71cc04df27fd52bc','E','Editor Doe','<i>editor. more or less.</i>','editor@email.com'),
   ('dummy','$2a$04$OhZlm0BhV43U8VKTrsUoyeT6hhoCr23LRxnhjUH1tnf/5BeZn6F5C','d8d2f1a46829e33c552f2615e89ab73eea487033e6ee0b000b721aee27ad6ab6ec788fae66e9b3c5ee3ee589de10673fae20e2ef32905b9d71cc04df27fd52bc','W','Dummy Doe','<i>dummy. more or less.</i>','dummy@email.com');
+INSERT INTO `writr_articles` VALUES
+  (2,1,'dummy title','editor','dummy content','2017-10-03 10:05:19',0),
+  (3,1,'dummy title','dummy','dummy content','2017-10-03 09:44:17',1),
+  (4,1,'dummy title','dummy','dummy content','2017-10-03 09:45:52',0),
+  (7,1,'dummy title','dummy','dummy content','2017-10-03 10:03:40',1);
