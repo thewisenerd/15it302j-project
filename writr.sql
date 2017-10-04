@@ -57,6 +57,26 @@ create table `writr_comments` (
   foreign key (`author`) references `writr_users`(`username`)
 );
 
+drop view if exists `writr_articles_featured`;
+create view `writr_articles_featured` as
+  select
+    `writr_featured`.`articleid` as `articleid`,
+    `writr_categories`.`name` as `category`,
+    `writr_articles`.`title` as `title`,
+    `writr_articles`.`author` as `author`,
+    `writr_articles`.`content` as `content`,
+    `writr_articles`.`date` as `date`,
+    (select count(*) from `writr_comments` where `writr_comments`.`articleid` = `writr_articles`.`articleid`) as `commentcount`
+  from `writr_featured`
+  left join
+    `writr_articles` on `writr_featured`.`articleid` = `writr_articles`.`articleid`
+  left join
+    `writr_categories` on `writr_articles`.`categoryid` = `writr_categories`.`categoryid`
+  where
+    `writr_articles`.`isdraft` != 1
+  order by `writr_featured`.`order` asc;
+
+
 /* sample data? */
 INSERT INTO `writr_categories` VALUES (1,'General',1);
 INSERT INTO `writr_users` VALUES

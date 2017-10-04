@@ -1,9 +1,17 @@
 doctype html
-html
+html(lang='en')
   head
-    title= title
-    link(rel='stylesheet', href='/stylesheets/style.css')
 
+    //- meta fixes
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+
+    //- title
+    block head-title
+      title= title
+
+    //- favicon
     link(rel='apple-touch-icon', sizes='180x180', href='/apple-touch-icon.png')
     link(rel='icon', type='image/png', sizes='32x32', href='/favicon-32x32.png')
     link(rel='icon', type='image/png', sizes='16x16', href='/favicon-16x16.png')
@@ -11,5 +19,32 @@ html
     link(rel='mask-icon', href='/safari-pinned-tab.svg', color='#5bbad5')
     meta(name='theme-color', content='#ffffff')
 
+    //- fontawesome+bulma
+    link(rel='stylesheet' href='/assets/font-awesome-4.7.0/css/font-awesome.min.css')
+    link(rel='stylesheet' href='/assets/bulma-0.5.1/css/bulma.min.css')
+
+    link(rel='stylesheet' href='/css/app.css')
+    block page-css
+
+    script(type='text/javascript' src='/js/bulma-main.js')
+    script(type='text/javascript' src='/js/moment.min.js')
+    block page-js
+
   body
     block content
+
+    section.section.hero.is-dark.footer
+      section.hero-body
+        .container
+          span.level
+            span.level-left
+              span.level-item
+                img(alt='writr' src='/assets/writr.svg' title='writr' style='height: 60px;')
+              span.level-item
+                h4.title.is-4 writr
+          div
+            span| Icons made by <a href="https://www.flaticon.com/authors/pixel-perfect" title="Pixel perfect">Pixel perfect</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>
+          div
+            span| 15it302j-project
+
+    block page-scripts
