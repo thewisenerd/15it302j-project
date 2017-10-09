@@ -1,0 +1,62 @@
+- config:
+    name: dummy tests
+    request:
+        base_url: http://127.0.0.1:3000/api
+
+# - test:
+#     name: dummmy
+#     request:
+#         url: /url
+#         method: GET
+#     validators:
+#         - {"check": "status_code", "comparator": "eq", "expected": 200}
+#         - {"check": "headers.content-type", "expected": "application/json; charset=utf-8"}
+#         - {"check": "content.status", "comparator": "eq", "expected": 0}
+
+- test:
+    name: GET /
+    request:
+        url: /
+        method: GET
+    validators:
+        - {"check": "status_code", "comparator": "eq", "expected": 200}
+        - {"check": "headers.content-type", "expected": "application/json; charset=utf-8"}
+        - {"check": "content.status", "comparator": "eq", "expected": 0}
+        - {"check": "content.data", "comparator": "eq", "expected": "welcome to the api"}
+
+- test:
+    name: GET node version
+    request:
+        url: /info/node
+        method: GET
+    validators:
+        - {"check": "status_code", "comparator": "eq", "expected": 200}
+        - {"check": "headers.content-type", "expected": "application/json; charset=utf-8"}
+        - {"check": "content.status", "comparator": "eq", "expected": 0}
+        - {"check": "content.data.version", "comparator": "eq", "expected": "v8.6.0"}
+
+- test:
+    name: GET mysql version
+    request:
+        url: /info/mysql
+        method: GET
+    validators:
+        - {"check": "status_code", "comparator": "eq", "expected": 200}
+        - {"check": "headers.content-type", "expected": "application/json; charset=utf-8"}
+        - {"check": "content.status", "comparator": "eq", "expected": 0}
+        - {"check": "content.data.version", "comparator": "eq", "expected": "10.1.28-MariaDB"}
+
+# - test:
+#     name: create user which does not exist
+#     request:
+#         url: http://127.0.0.1:5000/api/users/1000
+#         method: POST
+#         headers:
+#             device_sn: 9TN6O2Bn1vzfybF
+#             token: F8prvGryC5beBr4g
+#         json:
+#             name: "user1"
+#             password: "123456"
+#     validators:
+#         - {"check": "status_code", "comparator": "eq", "expected": 201}
+#         - {"check": "content.success", "comparator": "eq", "expected": true}

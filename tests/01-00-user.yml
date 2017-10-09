@@ -1,0 +1,37 @@
+- config:
+    name: dummy tests
+    request:
+        base_url: http://127.0.0.1:3000/api
+
+# - test:
+#     name: dummmy
+#     request:
+#         url: /url
+#         method: GET
+#     validators:
+#         - {"check": "status_code", "comparator": "eq", "expected": 200}
+#         - {"check": "headers.content-type", "expected": "application/json; charset=utf-8"}
+#         - {"check": "content.status", "comparator": "eq", "expected": 0}
+
+# - test:
+#     name: dummmy
+#     request:
+#         url: /url
+#         method: POST
+#         json:
+#             key: "something"
+#     validators:
+#         - {"check": "status_code", "comparator": "eq", "expected": 200}
+#         - {"check": "headers.content-type", "expected": "application/json; charset=utf-8"}
+#         - {"check": "content.status", "comparator": "eq", "expected": 0}
+
+- test:
+    name: 01 GET /user/inexistent
+    request:
+        url: /user/inexistent
+        method: GET
+    validators:
+        - {"check": "status_code", "comparator": "eq", "expected": 200}
+        - {"check": "headers.content-type", "expected": "application/json; charset=utf-8"}
+        - {"check": "content.status", "comparator": "eq", "expected": 1}
+        - {"check": "content.data.msg", "comparator": "eq", "expected": "user does not exist!"}

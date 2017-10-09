@@ -1,0 +1,5 @@
+#!/bin/bash
+
+source .env
+var=$1
+echo "${!var}"

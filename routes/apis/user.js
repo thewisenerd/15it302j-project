@@ -154,7 +154,7 @@ var route_user_username = (method, req, res, next) => {
 
       /* show result in case no key, or update. */
       delete arguser['pass'];
-      if (user.username == arguser.username) {
+      if (!user || user.username != arguser.username) {
         delete arguser['email'];
         delete arguser['key'];
       }

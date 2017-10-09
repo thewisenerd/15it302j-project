@@ -4,6 +4,9 @@
   to {
     transform: rotate(359deg); } }
 
+html {
+  overflow-y: auto; }
+
 body {
   background-color: whitesmoke; }
 

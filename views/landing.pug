@@ -1,0 +1,105 @@
+extends layout
+
+mixin postcard(article)
+  .card
+    .card-content
+      .media
+        .media-left
+          figure.image.is-48x48
+            img(src='/api/avatar/' + article.author, alt=article.author)
+        .media-content
+          p.title.is-4= article.title
+          p.subtitle.is-6= '@' + article.author + ' in ' + article.category
+      .content
+        span !{article.content}
+        br
+        span= article.date
+
+block content
+  section.section.hero.is-primary.is-fullheight
+    section.hero-body
+      .container
+        span.level
+          span.level-left
+            span.level-item
+              img(alt='writr' src='/assets/writr.svg' title='writr' style='height: 80px;')
+            span.level-item
+              h1.title.is-1 writr
+
+        h2.subtitle
+          | a simple blogging platform.
+          br
+          | just write #[span.icon #[i.fa.fa-pencil-square]]
+
+    section.hero-foot
+      footer.nav
+        .container
+          .nav-left
+            a.nav-item.is-active(href='#login') Login
+            a.nav-item(href='#signup') I'm new
+
+  a(name='login')
+  section.section.hero.is-light.is-fullheight
+    section.hero-body
+      .container.has-text-centered
+
+        h1.title login
+
+        form(action='/auth', method='POST')
+          .field
+            p.control.has-icons-left
+              input.input(type='text' name='username' placeholder='username' required)
+              span.icon.is-small.is-left
+                i.fa.fa-user
+          .field
+            p.control.has-icons-left
+              input.input(type='password' name='pass' placeholder='password' required)
+              span.icon.is-small.is-left
+                i.fa.fa-lock
+          .field.is-grouped.is-grouped-centered
+            input.button.is-primary(type='submit' value='Submit')
+
+  a(name='signup')
+  section.section.hero.is-info.is-fullheight
+    section.hero-body
+      .container.has-text-centered
+
+        h1.title signup
+
+        form#signup-form
+          .field
+            p.control.has-icons-left.has-icons-right
+              input#signup-username.input(type='text' name='username' placeholder='username' required)
+              span.icon.is-small.is-left
+                i.fa.fa-user
+              span.icon.is-small.is-right
+                i#username-availability-check.fa.fa-times
+
+          .field
+            p.control.has-icons-left
+              input#signup-pass.input(type='password' name='pass' placeholder='password' required)
+              span.icon.is-small.is-left
+                i.fa.fa-lock
+          .field
+            p.control.has-icons-left
+              input#signup-displayname.input(type='text' name='displayname' placeholder='display name' required)
+              span.icon.is-small.is-left
+                i.fa.fa-address-book-o
+          .field
+            p.control.has-icons-left
+              input#signup-displaydesc.input(type='text' name='displaydesc' placeholder='describe yourself' required)
+              span.icon.is-small.is-left
+                i.fa.fa-quote-right
+          .field
+            p.control.has-icons-left
+              input#signup-email.input(type='email' name='email' placeholder='email address' required)
+              span.icon.is-small.is-left
+                i.fa.fa-envelope-o
+
+          .field.is-grouped.is-grouped-centered
+            input.button.is-primary(type='submit' value='Submit')
+
+block page-js
+  script(type='text/javascript' src='/js/jquery-3.2.1.min.js')
+  script(type='text/javascript' src='/js/underscore-min.js')
+  script(type='text/javascript' src='/js/landing.page.js')

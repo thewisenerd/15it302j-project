@@ -1,11 +1,6 @@
 /* modify this */
 module.exports.db = {
   connectionLimit: 1000,
-  host: "host",
-  user: 'user',
-  password: 'password',
-  database: 'database',
-  charset: "utf8mb4_bin",
   rounds: 512
 };
 

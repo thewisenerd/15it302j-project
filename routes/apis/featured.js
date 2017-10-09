@@ -8,11 +8,9 @@ var config = require('../../config');
 router.route('/featured')
 .get((req, res, next) => {
   let q = mysql.format(
-    'select * from ?? where ?? != ? order by ? asc;',
+    'select * from ??;',
     [
-      config.db.tables['featured'],
-      'order', 0,
-      'order'
+      config.db.tables['articles_featured'],
     ]
   );
   helpers.query(q, (err, results, fields) => {
