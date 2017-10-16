@@ -19,6 +19,11 @@
     "morgan": "~1.9.0",
     "mysql": "^2.14.1",
     "pug": "2.0.0-beta11",
+    "quill": "^1.3.3",
+    "quill-delta": "^3.6.2",
+    "quill-delta-to-plaintext": "^1.0.0",
+    "quill-render": "^1.0.5",
+    "quilljs-renderer": "0.0.8",
     "sanitize-html": "^1.14.1",
     "serve-favicon": "~2.4.5"
   },

@@ -1,9 +1,44 @@
 extends layout
 
+mixin postcard(article)
+  div.card.is-fullwidth
+    .card-content
+      .media
+        .media-left
+          figure.image.is-48x48
+            img(src='/api/avatar/' + article.author, alt=article.author)
+        .media-content
+          p.title.is-4= article.title
+          p.subtitle.is-6= '@' + article.author + ' in ' + article.category
+      span !{article.text}
+
+    .card-footer
+      span.card-footer-item= article.daterel
+      span.card-footer-item= article.commentcount + ' comments'
+      span.card-footer-item
+        a(href='/article/' + article.articleid, target='_blank') Read More &gt;
+
+
 block content
-  section.hero.is-light.is-fullheight
+  section.hero.is-light
     .hero-head
       include includes/header.pug
+
+  section.hero
     .hero-body
+      .container
+        h1.title.is-3 Featured Articles
+        each article in featured
+          +postcard(article)
+          br
+
+  section.hero.is-medium
+    .hero-body
+      .container
+        h1.title.is-3 All Articles
+        each article in articles
+          +postcard(article)
+          br
+
 
   include includes/footer.pug

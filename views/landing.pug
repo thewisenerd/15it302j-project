@@ -1,20 +1,5 @@
 extends layout
 
-mixin postcard(article)
-  .card
-    .card-content
-      .media
-        .media-left
-          figure.image.is-48x48
-            img(src='/api/avatar/' + article.author, alt=article.author)
-        .media-content
-          p.title.is-4= article.title
-          p.subtitle.is-6= '@' + article.author + ' in ' + article.category
-      .content
-        span !{article.content}
-        br
-        span= article.date
-
 block content
   section.section.hero.is-primary.is-fullheight
     section.hero-body

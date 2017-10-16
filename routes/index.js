@@ -5,6 +5,10 @@ var crypto = require('crypto');
 var moment = require('moment')
 var mysql = require('mysql');
 
+var toPlaintext = require('quill-delta-to-plaintext');
+var Delta  = require('quill-delta');
+var render = require('quill-render');
+
 var config = require('../config');
 var helpers = require('./api-helpers');
 
@@ -99,13 +103,79 @@ router.post('/auth', (req, res, next) => {
   }); // authenticatepass
 }); // post /login
 
+var package_article_for_fp = (article) => {
+
+  let c = JSON.parse(article.content);
+  let d = new Delta(c["ops"]);
+
+  article.html = render( c["ops"] );
+  article.text = toPlaintext(d);
+
+
+  if (article.text.length > 200) {
+    article.text = article.text.substring(0,200);
+    article.text += '&hellip;';
+  }
+
+  article['daterel'] = moment(article.date).fromNow();
+
+
+  return article;
+};
+
 router.all('/', (req, res, next) => {
+  let q = mysql.format(
+    'select * from ?? where ?? = ?',
+    [
+      config.db.views['featured'],
+      'isdraft', 0
+    ]
+  );
+  helpers.query(q, (err, results, fields) => {
+    if (err) {
+      res.send("db failure. try agian.");
+      return;
+    }
+
+    for (let i = 0; i < results.length; i++) {
+      results[i] = package_article_for_fp(results[i]);
+    }
+
+    res.locals.featured = results;
+    next();
+  });
+}, (req, res, next) => {
+
+  let q = mysql.format(
+    'select * from ?? where ?? = ?',
+    [
+      config.db.views['articles'],
+      'isdraft', 0
+    ]
+  );
+  helpers.query(q, (err, results, fields) => {
+    if (err) {
+      res.send("db failure. try agian.");
+      return;
+    }
+
+    for (let i = 0; i < results.length; i++) {
+      results[i] = package_article_for_fp(results[i]);
+    }
+
+    res.locals.articles = results;
+    next();
+  });
+}, (req, res, next) => {
+
   res.render('index', {
     header: {
       read: true,
       edit: false,
       write: false,
-    }
+    },
+    featured: res.locals.featured,
+    articles: res.locals.articles,
   });
 });
 
