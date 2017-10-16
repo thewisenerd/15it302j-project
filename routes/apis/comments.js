@@ -132,8 +132,9 @@ router.route('/comments/:articleid/:commentid')
         return;
       }
 
-      if (comment.author == arguser.username || arguser.role == 'E') {
+      if (comment.author == arguser.username || (arguser.role == 'E' && req.body.moderate)) {
         /* if from owner of comment, it is an edit */
+        /* if it is from the editor, with the 'moderate' key in body, it is an edit */
         var q = mysql.format(
           'update ?? set ?? = ? where ?? = ?',
           [
