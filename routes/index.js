@@ -9,7 +9,7 @@ var config = require('../config');
 var helpers = require('./api-helpers');
 
 // TESTING
-var debug = 1;
+var debug = 0;
 if (debug) {
   let debug_key = '4a49d3ac6c4333aba07a4a80786402123db46112a725c1503c2739593cd113ea591d133c31d63cf1e02d31879302dcbcd4422b2d00751230a68b87e4f30d5792';
   router.use((req, res, next) => {

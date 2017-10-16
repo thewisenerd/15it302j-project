@@ -8,14 +8,28 @@ var mysql = require('mysql');
 var config = require('../../config');
 var helpers = require('../api-helpers');
 
-var route_user_username = (method, req, res, next) => {
+router.all('/user/:username', (req, res, next) => {
   let q = mysql.format(
     'select * from ?? where ?? = ?',
-    [config.db.tables['user'], 'username', req.params.username]
+    [
+      config.db.tables['user'],
+      'username', req.params.username
+    ]
   );
 
-  var create_new_user = (user) => {
-    var q = mysql.format(
+  helpers.query(q, (err, results, fields) => {
+    if (err) {
+      helpers.errexit(res, config.e.E_DBFAIL, err);
+      return;
+    }
+
+    res.locals.results = results;
+    next();
+  });
+}, (req, res, next) => {
+  let results = res.locals.results;
+  let create_new_user = (user) => {
+    let q = mysql.format(
       'insert into ?? (??, ??, ??, ??, ??, ??) values(?, ?, ?, ?, ?, ?);',
       [
         config.db.tables['user'],
@@ -44,136 +58,128 @@ var route_user_username = (method, req, res, next) => {
     });
   }; // create_new_user
 
-  var query_username_handler = (err, results, fields) => {
-    if (err) {
-      return helpers.errexit(res, config.e.E_DBFAIL, err);
-    }
+  // GET; no results; wrong username
+  if (results.length == 0 && req.method == 'GET') {
+    helpers.send(res, config.e.E_WRONG_PARAMETERS, {
+      "msg": "user does not exist."
+    });
+    return;
+  }
 
-    // GET; no results; wrong username
-    if (results.length == 0 && method == 'get') {
+  // POST; no results: create new user
+  if (results.length == 0 && req.method == 'POST') {
+    let rq = req.body;
+
+    if (rq.pass || rq.displayname || rq.displaydesc || rq.email) {
+      // check if any params set, and tell user about missing params
+
+      if (!rq.pass || !rq.displayname || !rq.displaydesc || !rq.email) {
+        return helpers.send(res, config.e.E_WRONG_PARAMETERS, {
+          "msg": "missing parameters. requires {pass, displayname, displaydesc, email}."
+        });
+      }
+
+      /* this is where we make a new user */
+      var user = {
+        username: req.params.username,
+        pass: bcrypt.hashSync(req.body.pass, config.db.rounds),
+        key: null, /* do not set key unless we have a login */
+        display: {
+          name: req.body.displayname,
+          desc: req.body.displaydesc,
+        },
+        email: req.body.email
+      };
+
+      return create_new_user(user);
+    } else {
+      // if no params set, user probably wanted :username to exist
       return helpers.send(res, config.e.E_WRONG_PARAMETERS, {
         "msg": "user does not exist!"
       });
     }
+  } // POST; no results: create new user
 
-    // POST; no results: create new user
-    if (results.length == 0 && method == 'post') {
+  var user = results[0];
+  helpers.authenticate(req.body.key, ((arguser) => (err, auth, user) => {
+
+    if (req.body.key && err) {
+      return helpers.errexit(res, err, err);
+    }
+
+    /* handle update */
+    if (
+      req.body.key &&
+      auth &&
+      (user.username == arguser.username) &&
+      (req.body.pass || req.body.displayname || req.body.displaydesc || req.body.email)
+    ) {
       var rq = req.body;
-
-      if (rq.pass || rq.displayname || rq.displaydesc || rq.email) {
-        // check if any params set, and tell user about missing params
-
-        if (!rq.pass || !rq.displayname || !rq.displaydesc || !rq.email) {
-          return helpers.send(res, config.e.E_WRONG_PARAMETERS, {
-            "msg": "missing parameters. requires {pass, displayname, displaydesc, email}."
-          });
-        }
-
-        /* this is where we make a new user */
-        var user = {
-          username: req.params.username,
-          pass: bcrypt.hashSync(req.body.pass, config.db.rounds),
-          key: null, /* do not set key unless we have a login */
-          display: {
-            name: req.body.displayname,
-            desc: req.body.displaydesc,
-          },
-          email: req.body.email
-        };
-
-        return create_new_user(user);
-      } else {
-        // if no params set, user probably wanted :username to exist
-        return helpers.send(res, config.e.E_WRONG_PARAMETERS, {
-          "msg": "user does not exist!"
-        });
-      }
-    } // POST; no results: create new user
-
-    var user = results[0];
-    helpers.authenticate(req.body.key, ((arguser) => (err, auth, user) => {
-
-      if (req.body.key && err) {
-        return helpers.errexit(res, err, err);
+      if (rq.pass) {
+        arguser['pass'] = bcrypt.hashSync(rq.pass, config.db.rounds);
       }
 
-      /* handle update */
-      if (
-        req.body.key &&
-        auth &&
-        (user.username == arguser.username) &&
-        (req.body.pass || req.body.displayname || req.body.displaydesc || req.body.email)
-      ) {
-        var rq = req.body;
-        if (rq.pass) {
-          arguser['pass'] = bcrypt.hashSync(rq.pass, config.db.rounds);
-        }
-
-        if (rq.displayname) {
-          arguser['displayname'] = rq.displayname;
-        }
-
-        if (rq.displaydesc) {
-          arguser['displaydesc'] = rq.displaydesc;
-        }
-
-        if (rq.email) {
-          arguser['email'] = rq.email;
-        }
-
-        var q = mysql.format(
-          'update ?? set ?? = ?, ?? = ?, ?? = ?, ?? = ? where ?? = ? and ?? = ?',
-          [
-            config.db.tables['user'],
-            'pass', arguser.pass,
-            'displayname', arguser.displayname,
-            'displaydesc', arguser.displaydesc,
-            'email', arguser.email,
-            'username', arguser.username,
-            'key', arguser.key
-          ]
-        );
-
-
-        helpers.query(q, (err, results, fields) => {
-          if (err) {
-            return errexit(res, config.e.E_DBFAIL, err);
-          }
-
-          if (results.affectedRows == 1) {
-            delete arguser['pass'];
-            helpers.send(res, config.e.E_OK, arguser);
-          } else {
-            helpers.errexit(res, config.e.E_SHOULD_NOT_HAPPEN);
-          }
-        });
-
-        /* update handled, return. */
-        return;
-      } /* handle update */
-
-      /* show result in case no key, or update. */
-      delete arguser['pass'];
-      if (!user || user.username != arguser.username) {
-        delete arguser['email'];
-        delete arguser['key'];
+      if (rq.displayname) {
+        arguser['displayname'] = rq.displayname;
       }
 
-      helpers.send(res, config.e.E_OK, arguser);
-    })(user));
-  }; // query_username_handler
+      if (rq.displaydesc) {
+        arguser['displaydesc'] = rq.displaydesc;
+      }
 
-  return helpers.query(q, query_username_handler);
-}; // route_user_username
-router.route('/user/:username')
-  .get(function(req, res, next) {
-    route_user_username('get', req, res, next);
-  }).post(function(req, res, next) {
-    route_user_username('post', req, res, next);
-  });
+      if (rq.email) {
+        arguser['email'] = rq.email;
+      }
+
+      var q = mysql.format(
+        'update ?? set ?? = ?, ?? = ?, ?? = ?, ?? = ? where ?? = ? and ?? = ?',
+        [
+          config.db.tables['user'],
+          'pass', arguser.pass,
+          'displayname', arguser.displayname,
+          'displaydesc', arguser.displaydesc,
+          'email', arguser.email,
+          'username', arguser.username,
+          'key', arguser.key
+        ]
+      );
+
+
+      helpers.query(q, (err, results, fields) => {
+        if (err) {
+          return errexit(res, config.e.E_DBFAIL, err);
+        }
+
+        if (results.affectedRows == 1) {
+          delete arguser['pass'];
+          helpers.send(res, config.e.E_OK, arguser);
+        } else {
+          helpers.errexit(res, config.e.E_SHOULD_NOT_HAPPEN);
+        }
+      });
+
+      /* update handled, return. */
+      return;
+    } /* handle update */
+
+    /* show result in case no key, or update. */
+    delete arguser['pass'];
+    if (!user || user.username != arguser.username) {
+      delete arguser['email'];
+      delete arguser['key'];
+    }
+
+    helpers.send(res, config.e.E_OK, arguser);
+  })(user)); // authenticate
+
+}); /* /user/:username */
 
 router.route('/user/:username/auth')
-.post((req, res, next) => {
+.get((req, res, next) => {
+  return helpers.send(res, config.e.E_WRONG_PARAMETERS, {
+    "msg": "resource does not support GET. POST with {pass}."
+  });
+}).post((req, res, next) => {
   if (!req.body.pass) {
     return helpers.send(res, config.e.E_WRONG_PARAMETERS, {
       msg: "requires {pass}"
@@ -216,7 +222,11 @@ router.route('/user/:username/auth')
 }); // POST: /user/:username/auth
 
 router.route('/user/:username/purge')
-.post((req, res, next) => {
+.get((req, res, next) => {
+  return helpers.send(res, config.e.E_WRONG_PARAMETERS, {
+    "msg": "resource does not support GET. POST with {key} || {pass}."
+  });
+}).post((req, res, next) => {
   if ( ! (req.body.key || req.body.pass) ) {
     return helpers.send(res, config.e.E_WRONG_PARAMETERS, {
       msg: "requires {key} || {pass}."
@@ -232,6 +242,10 @@ router.route('/user/:username/purge')
   var purge_handler = ( (arguser) => (err, auth, user) => {
     if (err) {
       return helpers.errexit(res, err, err);
+    }
+
+    if (user.username != arguser.username) {
+      return helpers.errexit(res, config.e.E_KEY_FAILURE);
     }
 
     return helpers.purgekey(arguser.username, (err) => {
