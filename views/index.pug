@@ -24,21 +24,30 @@ block content
     .hero-head
       include includes/header.pug
 
-  section.hero
-    .hero-body
-      .container
-        h1.title.is-3 Featured Articles
-        each article in featured
-          +postcard(article)
-          br
+  if featured.length
+    section.hero
+      .hero-body
+        .container
+          h1.title.is-3 Featured Articles
+          each article in featured
+            +postcard(article)
+            br
 
-  section.hero.is-medium
-    .hero-body
-      .container
-        h1.title.is-3 All Articles
-        each article in articles
-          +postcard(article)
+  if articles.length
+    section.hero.is-medium
+      .hero-body
+        .container
+          h1.title.is-3 All Articles
+          each article in articles
+            +postcard(article)
+            br
+  else
+    section.hero.is-fullheight
+      .hero-body
+        .container
+          h1.title.is-3 All Articles
           br
+          h2.subtitle no articles :(
 
 
   include includes/footer.pug
