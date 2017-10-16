@@ -95,6 +95,9 @@ INSERT INTO `writr_categories` VALUES
 /* dummy data. */
 INSERT INTO `writr_categories` VALUES (3,'Adventure',3);
 INSERT INTO `writr_users` VALUES ('dummy0','$2a$04$FWxc1csluBr5CsqSmKP.bemqeFIKjojrS0Gdfzk/.RQYn9XocBxle','4b427bff695d2c1fbbc4305a5e39c08266e3fb860755c88d4e755b6131bccd74e5394914074b6219c700c797e6f102eaea37f8018828472900208544c1674578','W','Dummy Author #0','Description for Dummy Author #0','dummy0@email.com');
-INSERT INTO `writr_articles` VALUES (1,1,'Test Article #1','dummy0','Edited Dummy Article Content #1','2017-10-17 01:22:18',0),(2,2,'Test Article #2','dummy0','Edited Dummy Article Content #2','2017-10-17 01:22:22',0),(3,3,'Test Article #3','dummy0','Dummy Article Content #3','2017-10-17 01:21:50',1);
+INSERT INTO `writr_articles` VALUES
+  (1,1,'Test Article #1','dummy0','{"ops":[{"insert":"Edited Dummy Article Content #1\\n"}]}','2017-10-17 01:22:18',0),
+  (2,2,'Test Article #2','dummy0','{"ops":[{"insert":"Edited Dummy Article Content #2\\n"}]}','2017-10-17 01:22:22',0),
+  (3,3,'Test Article #3','dummy0','{"ops":[{"insert":"Dummy Article Content #3\\n"}]}','2017-10-17 01:21:50',1);
 INSERT INTO `writr_comments` VALUES (1,1,'Test Root Comment Edited #0',0,'editor','2017-10-17 01:22:40'),(2,1,'Moderated Nested Comment Layer #2',1,'dummy0','2017-10-17 01:22:51'),(3,1,'Nested Comment Layer #2',2,'editor','2017-10-17 01:23:38');
 INSERT INTO `writr_featured` VALUES (1,2),(2,1);

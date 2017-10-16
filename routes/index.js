@@ -9,9 +9,9 @@ var config = require('../config');
 var helpers = require('./api-helpers');
 
 // TESTING
-var debug = 0;
+var debug = 1;
 if (debug) {
-  let debug_key = '4a49d3ac6c4333aba07a4a80786402123db46112a725c1503c2739593cd113ea591d133c31d63cf1e02d31879302dcbcd4422b2d00751230a68b87e4f30d5792';
+  let debug_key = '4b427bff695d2c1fbbc4305a5e39c08266e3fb860755c88d4e755b6131bccd74e5394914074b6219c700c797e6f102eaea37f8018828472900208544c1674578';
   router.use((req, res, next) => {
     req.session.key = debug_key;
     next();
