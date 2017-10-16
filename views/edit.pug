@@ -1,0 +1,75 @@
+extends layout
+
+block page-css
+  link(href='/assets/quill/quill.snow.css' rel='stylesheet')
+  link(href='/assets/quill/quill.bubble.css' rel='stylesheet')
+
+block page-js
+  script(type='text/javascript' src='/js/jquery-3.2.1.min.js')
+  script(type='text/javascript' src='/js/underscore-min.js')
+  script(src='/assets/quill/quill.min.js')
+
+block page-scripts
+  script(type="text/javascript").
+    window.KEY = "#{user.key}";
+    window.USER = "#{user.username}";
+    window.ARTICLE = {
+      "articleid": !{article.articleid},
+      "title": "#{article.title}",
+      "content": !{article.content},
+      "isdraft": "#{article.isdraft}"
+    };
+    $(() => {
+      window.editor = new Quill('#article-editor', {
+        theme: 'snow',
+        placeholder: 'Compose an epic...',
+      });
+      window.editor.setContents(window.ARTICLE.content);
+    });
+
+  script(src='/js/edit.js')
+
+block content
+  section.hero.is-light
+    .hero-head
+      include includes/header.pug
+
+  section.section.is-light
+
+      form#article-form
+        .field
+          label.label Title
+          .control
+            input#article-title.input(type='text' value=article.title required)
+
+        .field
+          label.label Category
+          .control
+            .select
+              select#article-category
+                each opt in categories
+                  if opt.categoryid == article.categoryid
+                    option(value=opt.categoryid selected)= opt.name
+                  else
+                    option(value=opt.categoryid)= opt.name
+
+        .field
+          label.label Publish
+          .control
+            label.checkbox
+              if article.isdraft
+                input#article-isdraft(type='checkbox')
+              else
+                input#article-isdraft(type='checkbox' checked)
+              | &nbsp; If checked, article will be published. Otherwise saved as draft.
+
+        .field
+          label.label Content
+          .control
+            #article-editor
+
+        br
+        br
+
+        .field.is-grouped.is-grouped-centered
+          input.button.is-primary(type='submit' value='Submit')

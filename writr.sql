@@ -57,27 +57,38 @@ create table `writr_comments` (
   foreign key (`author`) references `writr_users`(`username`)
 );
 
-drop view if exists `writr_articles_featured`;
-create view `writr_articles_featured` as
+drop view if exists `writr_view_articles`;
+create view `writr_view_articles` as
   select
-    `writr_featured`.`articleid` as `articleid`,
+    `writr_articles`.`articleid` as `articleid`,
     `writr_categories`.`name` as `category`,
     `writr_articles`.`title` as `title`,
     `writr_articles`.`author` as `author`,
     `writr_articles`.`content` as `content`,
     `writr_articles`.`date` as `date`,
     (select count(*) from `writr_comments` where `writr_comments`.`articleid` = `writr_articles`.`articleid`) as `commentcount`
-  from `writr_featured`
-  left join
-    `writr_articles` on `writr_featured`.`articleid` = `writr_articles`.`articleid`
+  from `writr_articles`
   left join
     `writr_categories` on `writr_articles`.`categoryid` = `writr_categories`.`categoryid`
   where
     `writr_articles`.`isdraft` != 1
+  order by `writr_articles`.`articleid` desc;
+
+
+drop view if exists `writr_view_featured`;
+create view `writr_view_featured` as
+  select
+    `writr_view_articles`.*
+  from `writr_featured`
+  left join
+    `writr_view_articles` on `writr_featured`.`articleid` = `writr_view_articles`.`articleid`
   order by `writr_featured`.`order` asc;
 
-
-/* always create editor */
-/* password: letmeinpls */
+/* always create the user editor:letmeinpls with a key*/
 INSERT INTO `writr_users` VALUES
   ('editor','$2a$04$OhZlm0BhV43U8VKTrsUoyeT6hhoCr23LRxnhjUH1tnf/5BeZn6F5C','d8d2f1a46829e33c552f2615e89ab73eea487033e6ee0b000b721aee27ad6ab6ec788fae66e9b3c5ee3ee589de10673fae20e2ef32905b9d71cc04df27fd52bc','E','Editor Doe','<i>editor. more or less.</i>','editor@email.com');
+
+/* always insert at least two categories */
+INSERT INTO `writr_categories` VALUES
+  (1, 'General', 1),
+  (2, 'Fiction', 2);

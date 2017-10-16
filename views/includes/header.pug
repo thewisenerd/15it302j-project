@@ -1,0 +1,20 @@
+nav.navbar.is-transparent
+  .container
+    .navbar-brand
+      a.navbar-item
+        img(src='/assets/writr.png' alt='logo' height="28px" width="auto" style="padding-right:1em;")
+        b.is-strong.is-dark Writr
+    .navbar-menu
+      .navbar-end
+        if header.read
+          a.nav-item.is-active(href="/") #[span.icon #[i.fa.fa-book]] Read
+        else
+          a.nav-item(href="/") #[span.icon #[i.fa.fa-book]] Read
+        if header.edit
+          a.nav-item.is-active(href="/edit") #[span.icon #[i.fa.fa-edit]] Edit
+        else
+          a.nav-item(href="/edit") #[span.icon #[i.fa.fa-edit]] Edit
+        if header.write
+          a.nav-item.is-active(href="/write") #[span.icon #[i.fa.fa-pencil]] Write
+        else
+          a.nav-item(href="/write") #[span.icon #[i.fa.fa-pencil]] Write

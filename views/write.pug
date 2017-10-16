@@ -1,0 +1,55 @@
+extends layout
+
+block page-css
+  link(href='/assets/quill/quill.snow.css' rel='stylesheet')
+  link(href='/assets/quill/quill.bubble.css' rel='stylesheet')
+
+block page-js
+  script(type='text/javascript' src='/js/jquery-3.2.1.min.js')
+  script(type='text/javascript' src='/js/underscore-min.js')
+  script(src='/assets/quill/quill.min.js')
+
+block page-scripts
+  script(type="text/javascript").
+    window.KEY = "#{user.key}";
+    window.USER = "#{user.username}";
+  script(src='/js/write.js')
+
+block content
+  section.hero.is-light
+    .hero-head
+      include includes/header.pug
+
+  section.section.is-light
+
+      form#article-form
+        .field
+          label.label Title
+          .control
+            input#article-title.input(type='text' required)
+
+        .field
+          label.label Category
+          .control
+            .select
+              select#article-category
+                each opt in categories
+                  option(value=opt.categoryid)= opt.name
+
+        .field
+          label.label Publish
+          .control
+            label.checkbox
+              input#article-isdraft(type='checkbox')
+              | &nbsp; If checked, article will be published. Otherwise saved as draft.
+
+        .field
+          label.label Content
+          .control
+            #article-editor
+
+        br
+        br
+
+        .field.is-grouped.is-grouped-centered
+          input.button.is-primary(type='submit' value='Submit')
