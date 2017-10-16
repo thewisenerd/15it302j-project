@@ -16,18 +16,19 @@ block page-scripts
   script(src='/js/write.js')
 
 block content
-  section.hero.is-light
-    .hero-head
-      include includes/header.pug
+  .container
+    section.hero.is-light
+      .hero-head
+        include includes/header.pug
 
-  section.section.is-light
-
+    section.section.is-light
       form#article-form
+        //- TITLE
         .field
           label.label Title
           .control
             input#article-title.input(type='text' required)
-
+        //- CATEGORY
         .field
           label.label Category
           .control
@@ -35,21 +36,20 @@ block content
               select#article-category
                 each opt in categories
                   option(value=opt.categoryid)= opt.name
-
+        //- DRAFT
         .field
           label.label Publish
           .control
             label.checkbox
               input#article-isdraft(type='checkbox')
               | &nbsp; If checked, article will be published. Otherwise saved as draft.
-
+        //- CONTENT
         .field
           label.label Content
           .control
             #article-editor
-
         br
         br
-
+        //- SUBMIT
         .field.is-grouped.is-grouped-centered
           input.button.is-primary(type='submit' value='Submit')

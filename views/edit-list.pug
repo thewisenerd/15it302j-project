@@ -1,30 +1,32 @@
 extends layout
 
 block content
-  section.hero.is-light
-    .hero-head
-      include includes/header.pug
+  .container
+    section.hero.is-light
+      .hero-head
+        include includes/header.pug
 
-  section.section.is-light
-    table.table.is-fullwidth
-      thead
-        tr
-          th Title
-          th Category
-          th Draft?
-          th Last Modified
-          th Edit?
-      tbody
-        each article in articles
+    section.section.is-light
+      table.table.is-fullwidth
+        thead
           tr
-            td #{article.title}
-            td #{article.category}
-            if article.draft
-              td Draft
-            else
-              td Published
-            td #{article.daterel}
-            td
-              a.button.is-primary(href='/edit/'+article.articleid) Edit
-
-  section.
+            th Title
+            th Category
+            th Draft?
+            th Last Modified
+            th Edit?
+        tbody
+          each article in articles
+            tr
+              td #{article.title}
+              td #{article.category}
+              if article.draft
+                td Draft
+              else
+                td Published
+              td #{article.daterel}
+              td
+                a.button.is-primary(href='/edit/'+article.articleid) Edit
+          else
+            tr
+              td.has-text-centered(colspan=5) You haven't written any articles yet.

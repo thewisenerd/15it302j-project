@@ -8,11 +8,15 @@ var mysql = require('mysql');
 var config = require('../config');
 var helpers = require('./api-helpers');
 
-// TESTING: Login as Editor by Default.
-router.use((req, res, next) => {
-  req.session.key = 'd8d2f1a46829e33c552f2615e89ab73eea487033e6ee0b000b721aee27ad6ab6ec788fae66e9b3c5ee3ee589de10673fae20e2ef32905b9d71cc04df27fd52bc';
-  next();
-});
+// TESTING
+var debug = 1;
+if (debug) {
+  let debug_key = '4a49d3ac6c4333aba07a4a80786402123db46112a725c1503c2739593cd113ea591d133c31d63cf1e02d31879302dcbcd4422b2d00751230a68b87e4f30d5792';
+  router.use((req, res, next) => {
+    req.session.key = debug_key;
+    next();
+  });
+}
 
 // check for authentication everywhere but few places
 var checkauth = (req, res, next) => {
@@ -145,28 +149,26 @@ router.get('/edit/:articleid', (req, res, next) => {
   );
   helpers.query(q, (err, results, fields) => {
     if (err) {
-      res.send("db failure. try agian.");
+      res.send("db failure. try again.");
       return;
     }
 
     if (results.length == 0) {
-      res.send("wrong article");
+      res.send("Wrong Article ID.");
       return;
     }
 
     res.locals.article = results[0];
 
+    // TODO: check for editor here.
     if (res.locals.article.author != res.locals.user.username) {
-      res.send("you do not own this.");
+      res.send("Wrong Article ID.");
       return;
     }
 
     next();
   });
 }, (req, res, next) => {
-
-  console.log(res.locals.article);
-
   res.render('edit', {
     header: {
       read: false,
@@ -180,43 +182,28 @@ router.get('/edit/:articleid', (req, res, next) => {
 
 
 router.get('/edit', (req, res, next) => {
+  // TODO: check for editor here.
+
   let q = mysql.format(
-    'select \
-    writr_articles.articleid, writr_articles.title, writr_categories.name as category, \
-    writr_articles.isdraft, writr_articles.date \
-    from ?? \
-    left join writr_categories on writr_articles.categoryid = writr_categories.categoryid \
-    where ?? = ? \
-    order by writr_articles.articleid desc',
+    'select * from ?? where ?? = ? order by ?? desc',
     [
-      config.db.tables['articles'],
-      'author', res.locals.user.username
+      config.db.views['articles'],
+      'author', res.locals.user.username,
+      'articleid' /* order by */
     ]
   );
 
-  console.log(q);
-
   helpers.query(q, (err, results, fields) => {
     if (err) {
-      console.log(err);
       res.send("db failure. try agian.");
-      return;
-    }
-
-    if (results.length == 0) {
-      res.send("no articles written by you.");
       return;
     }
 
     res.locals.articles = results;
     next();
-
-
   });
 
 }, (req, res, next) => {
-
-  // res.json(res.locals.articles);
 
   for (var i = 0;  i < res.locals.articles.length; i++) {
     var ar = res.locals.articles[i];

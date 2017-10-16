@@ -26,22 +26,22 @@ block page-scripts
       });
       window.editor.setContents(window.ARTICLE.content);
     });
-
   script(src='/js/edit.js')
 
 block content
-  section.hero.is-light
-    .hero-head
-      include includes/header.pug
+  .container
+    section.hero.is-light
+      .hero-head
+        include includes/header.pug
 
-  section.section.is-light
-
+    section.section.is-light
       form#article-form
+        //- TITLE
         .field
           label.label Title
           .control
             input#article-title.input(type='text' value=article.title required)
-
+        //- CATEGORY
         .field
           label.label Category
           .control
@@ -52,7 +52,7 @@ block content
                     option(value=opt.categoryid selected)= opt.name
                   else
                     option(value=opt.categoryid)= opt.name
-
+        //- ISDRAFT
         .field
           label.label Publish
           .control
@@ -62,14 +62,13 @@ block content
               else
                 input#article-isdraft(type='checkbox' checked)
               | &nbsp; If checked, article will be published. Otherwise saved as draft.
-
+        //- CONTENT
         .field
           label.label Content
           .control
             #article-editor
-
         br
         br
-
+        //- SUBMIT
         .field.is-grouped.is-grouped-centered
-          input.button.is-primary(type='submit' value='Submit')
+          input.button.is-primary(type='submit' value='Save')
