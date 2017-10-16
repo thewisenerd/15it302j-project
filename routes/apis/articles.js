@@ -77,9 +77,8 @@ router.route('/articles')
       offset = parseInt(req.body.offset);
     }
     var q = mysql.format(
-      'select ??, ??, ??, ??, ?? from ?? where ?? = ? limit ?,?;',
+      'select * from ?? where ?? = ? limit ?,?;',
       [
-        'articleid', 'categoryid', 'title', 'content', 'date',
         config.db.tables['articles'],
         'author', user.username,
         offset, count
@@ -180,8 +179,9 @@ router.route('/articles/:articleid')
         if (rq.isdraft) {
           article.isdraft = rq.isdraft;
         }
+
         if (!isNaN(parseInt(rq.categoryid))) {
-          article.categoryid == parseInt(rq.categoryid);
+          article.categoryid = parseInt(rq.categoryid);
         }
 
         // sql query here
@@ -232,7 +232,8 @@ router.route('/articles/:articleid')
         if (rq.isdraft) {
           article.isdraft = rq.isdraft;
         }
-        if (parseInt(req.query.categoryid)) {
+
+        if (!isNaN(parseInt(req.query.categoryid))) {
           article.categoryid == rq.categoryid;
         }
         if (rq.title) {

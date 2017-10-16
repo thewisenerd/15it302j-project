@@ -132,7 +132,7 @@ router.all('/categories/:category', (req, res, next) => {
 
     if (results.length == 0 && req.method == 'GET') {
       return helpers.send(res, config.e.E_WRONG_PARAMETERS, {
-        "msg": "resource does not support GET."
+        "msg": "category [" + req.params.category +  "] does not exist."
       });
     }
 
