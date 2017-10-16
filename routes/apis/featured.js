@@ -8,9 +8,10 @@ var config = require('../../config');
 router.route('/featured')
 .get((req, res, next) => {
   let q = mysql.format(
-    'select * from ??;',
+    'select * from ?? where ?? = ?',
     [
-      config.db.tables['articles_featured'],
+      config.db.views['featured'],
+      'isdraft', '0'
     ]
   );
   helpers.query(q, (err, results, fields) => {

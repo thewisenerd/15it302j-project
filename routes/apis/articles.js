@@ -30,10 +30,9 @@ var route_get_articles = (method, req, res, next) => {
   } // method == 'post'
 
   var q = mysql.format(
-    'select ??, ??, ??, ??, ?? from ?? where ?? = ? limit ?,?;',
+    'select * from ?? where ?? = ? limit ?,?;',
     [
-      'articleid', 'categoryid', 'title', 'author', 'date',
-      config.db.tables['articles'],
+      config.db.views['articles'],
       'isdraft', 0,
       offset, count
     ]
