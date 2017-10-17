@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# deps:
+# curl https://getcaddy.com | bash -s personal
+
 set -euo pipefail
 
 dir=${PWD##*/}
@@ -10,7 +13,7 @@ if [ "$dir" == "bin" ] ; then
 fi
 
 # setup npm
-# npm install
+npm install
 
 # copy configuration files
 if [ ! -e "config.js" ] ; then
