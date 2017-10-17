@@ -28,6 +28,7 @@ var checkauth = (req, res, next) => {
     req.session.key ||           // key set
     req.path === '/auth' ||      // auth access
     req.path === '/signup' ||    // new signup
+    req.path === '/logout' ||    // logout
     req.path.startsWith("/api/") // api access
   ) {
 
@@ -68,6 +69,29 @@ router.get('/auth', (req, res, next) => {
   }
 
   res.render('landing');
+});
+
+router.all('/logout', (req, res, next) => {
+  /* if key is set */
+  if (req.session.key) {
+    /* try authenticating key */
+    helpers.authenticate(req.session.key, (err, auth, user) => {
+      /* if errors, invalid key; redirect to /auth */
+      if (err || !auth) {
+        delete req.session.key;
+        res.redirect('/auth');
+        return;
+      }
+
+      helpers.purgekey(user.username, (err) => {
+        delete req.session.key;
+        res.redirect('/auth');
+        return;
+      })
+    });
+  } else {
+    res.redirect('/auth');
+  }
 });
 
 router.post('/auth', (req, res, next) => {
