@@ -1,12 +1,15 @@
 .container
   nav.navbar.is-light
     .navbar-brand
-      a.navbar-item.level(href='/')
-        .level-item
-          img(src='/assets/writr.svg' alt='logo' height="auto" width="28px" style="margin-right: 1rem;")
-        .level-item
-          b.is-strong.is-dark Writr
-    .navbar-menu
+      a.navbar-item(href='/')
+        img(src='/assets/writr.svg' alt='logo' height="auto" width="28px" style="margin-right: 1rem;")
+        b.is-strong.is-dark Writr
+
+      .navbar-burger.burger(data-target="navigationMenu")
+        span
+        span
+        span
+    .navbar-menu#navigationMenu
       .navbar-end
         if header.read
           a.navbar-item.is-active(href="/") #[span.icon #[i.fa.fa-book]] Read
