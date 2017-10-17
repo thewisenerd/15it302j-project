@@ -1,36 +1,3 @@
-var notify = (str, type='danger') => {
-
-  let b = $('<button />');
-  $(b).addClass('delete');
-
-  let e = $('<div />');
-  $(e).addClass('notification');
-  $(e).addClass('is-' + type);
-
-  $(e).css('position', 'fixed');
-  $(e).css('bottom', '5px');
-  $(e).css('left', '5px');
-
-  $(e).append(b);
-  $(e).append(str);
-
-  if ($('#notifications > .notification') != undefined) {
-    var id = 'notification-' +  $('#notifications > .notification').length.toString();
-  } else {
-    var id = 'notification-0';
-  }
-
-  $(e).addClass(id);
-
-  $(e).appendTo( '#notifications' );
-
-  $('#notifications').on('click', '.'+id, function() {
-    // console.log($(this));
-    $(this).remove();
-  });
-
-};
-
 $(() => {
 
   var article_submit_handler = (e) => {
@@ -50,7 +17,7 @@ $(() => {
 
     length = window.editor.getLength();
     if (length <= 1) {
-      notify("enter some article content");
+      window.NOTIFY("enter some article content");
       return false;
     }
 
@@ -61,12 +28,9 @@ $(() => {
     $.post(url, article, (res) => {
       if (res.status == 0) {
         console.log(res);
-        notify("article saved successfully.", "success");
-        // setTimeout( () => {
-        //   window.location.href = '/edit/' + res.data.articleid
-        // }, 5000);
+        window.NOTIFY("article saved successfully.", "success");
       } else {
-        notify("db error. contact admin.");
+        window.NOTIFY("db error. contact admin.");
       }
     }); // post
 

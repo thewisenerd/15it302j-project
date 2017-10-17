@@ -1,13 +1,12 @@
 extends layout
 
 block page-css
-  link(href='/assets/quill/quill.snow.css' rel='stylesheet')
-  link(href='/assets/quill/quill.bubble.css' rel='stylesheet')
+  link(href='/assets/quill/dist/quill.snow.css' rel='stylesheet')
 
 block page-js
-  script(type='text/javascript' src='/js/jquery-3.2.1.min.js')
-  script(type='text/javascript' src='/js/underscore-min.js')
-  script(src='/assets/quill/quill.min.js')
+  script(type='text/javascript' src='/assets/jquery/dist/jquery.min.js')
+  script(type='text/javascript' src='/assets/quill/dist/quill.min.js')
+  script(type='text/javascript' src='/js/notify.js')
 
 block page-scripts
   script(type="text/javascript").
