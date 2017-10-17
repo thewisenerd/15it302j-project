@@ -3,13 +3,13 @@
 	"file": "app.css",
 	"sources": [
 		"../../sass/app.scss",
-		"../../sass/bulma/sass/utilities/_all.sass",
-		"../../sass/bulma/sass/utilities/initial-variables.sass",
-		"../../sass/bulma/sass/utilities/functions.sass",
-		"../../sass/bulma/sass/utilities/derived-variables.sass",
-		"../../sass/bulma/sass/utilities/animations.sass",
-		"../../sass/bulma/sass/utilities/mixins.sass",
-		"../../sass/bulma/sass/utilities/controls.sass"
+		"../../node_modules/bulma/sass/utilities/_all.sass",
+		"../../node_modules/bulma/sass/utilities/initial-variables.sass",
+		"../../node_modules/bulma/sass/utilities/functions.sass",
+		"../../node_modules/bulma/sass/utilities/derived-variables.sass",
+		"../../node_modules/bulma/sass/utilities/animations.sass",
+		"../../node_modules/bulma/sass/utilities/mixins.sass",
+		"../../node_modules/bulma/sass/utilities/controls.sass"
 	],
 	"names": [],
 	"mappings": "AKAA,UAAU,CAAV,UAAU;EACR,AAAA,IAAI;IACF,SAAS,EAAE,YAAY;EACzB,AAAA,EAAE;IACA,SAAS,EAAE,cAAc;;ALF7B,AAAA,IAAI,CAAC;EACJ,UAAU,EAAE,IAAI,GAChB;;AAED,AAAA,IAAI,EAAC,AAAA,IAAI,CAAC;EACT,gBAAgB,EAAE,OAAO,GACzB;;AAED,AACC,OADM,AACN,eAAgB,CAAC;EAChB,gBAAgB,EAAE,WAAW,GAC7B;;AAGF,AACC,KADI,AAAA,SAAS,CACb,CAAC,AAAA,YAAY,AAAA,MAAM,EADpB,AACsB,KADjB,AAAA,SAAS,CACQ,CAAC,AAAA,SAAS,AAAA,MAAM,EADtC,AACwC,KADnC,AAAA,SAAS,CAC0B,CAAC,AAAA,YAAY,AAAA,UAAU,EAD/D,AACiE,KAD5D,AAAA,SAAS,CACmD,CAAC,AAAA,SAAS,AAAA,UAAU,CAAC;EACpF,gBAAgB,EAAE,kBAAe;EACjC,KAAK,EAAE,IAAI,GACX;;AAGF,AAAA,QAAQ,AAAA,WAAW,CAAA;EAClB,WAAW,EAAE,MAAM;EACnB,cAAc,EAAE,MAAM,GACtB;;AAED,AAAA,CAAC,AAAA,UAAU,CAAC;EACX,aAAa,EAAE,MAAM,GACrB"

@@ -1,15 +1,17 @@
-document.addEventListener('DOMContentLoaded', () => {
+'use strict';
+
+document.addEventListener('DOMContentLoaded', function () {
 
   // Dropdowns
 
-  const $metalinks = getAll('#meta a');
+  var $metalinks = getAll('#meta a');
 
   if ($metalinks.length > 0) {
-    $metalinks.forEach($el => {
-      $el.addEventListener('click', event => {
+    $metalinks.forEach(function ($el) {
+      $el.addEventListener('click', function (event) {
         event.preventDefault();
-        const target = $el.getAttribute('href');
-        const $target = document.getElementById(target.substring(1));
+        var target = $el.getAttribute('href');
+        var $target = document.getElementById(target.substring(1));
         $target.scrollIntoView(true);
         // window.history.replaceState(null, document.title, `${window.location.origin}${window.location.pathname}${target}`);
         return false;
@@ -19,36 +21,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Dropdowns
 
-  const $dropdowns = getAll('.dropdown:not(.is-hoverable)');
+  var $dropdowns = getAll('.dropdown:not(.is-hoverable)');
 
   if ($dropdowns.length > 0) {
-    $dropdowns.forEach($el => {
-      $el.addEventListener('click', event => {
+    $dropdowns.forEach(function ($el) {
+      $el.addEventListener('click', function (event) {
         event.stopPropagation();
         $el.classList.toggle('is-active');
       });
     });
 
-    document.addEventListener('click', event => {
+    document.addEventListener('click', function (event) {
       closeDropdowns();
     });
   }
 
   function closeDropdowns() {
-    $dropdowns.forEach($el => {
+    $dropdowns.forEach(function ($el) {
       $el.classList.remove('is-active');
     });
   }
 
   // Toggles
 
-  const $burgers = getAll('.burger');
+  var $burgers = getAll('.burger');
 
   if ($burgers.length > 0) {
-    $burgers.forEach($el => {
-      $el.addEventListener('click', () => {
-        const target = $el.dataset.target;
-        const $target = document.getElementById(target);
+    $burgers.forEach(function ($el) {
+      $el.addEventListener('click', function () {
+        var target = $el.dataset.target;
+        var $target = document.getElementById(target);
         $el.classList.toggle('is-active');
         $target.classList.toggle('is-active');
       });
@@ -57,18 +59,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Modals
 
-  const $html = document.documentElement;
-  const $modals = getAll('.modal');
-  const $modalButtons = getAll('.modal-button');
-  // const $modalCloses = getAll('.modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button');
-  // do not let modal-background close modal.
-  const $modalCloses = getAll('.modal-close, .modal-card-head .delete, .modal-card-foot .button');
+  var $html = document.documentElement;
+  var $modals = getAll('.modal');
+  var $modalButtons = getAll('.modal-button');
+  var $modalCloses = getAll('.modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button');
 
   if ($modalButtons.length > 0) {
-    $modalButtons.forEach($el => {
-      $el.addEventListener('click', () => {
-        const target = $el.dataset.target;
-        const $target = document.getElementById(target);
+    $modalButtons.forEach(function ($el) {
+      $el.addEventListener('click', function () {
+        var target = $el.dataset.target;
+        var $target = document.getElementById(target);
         $html.classList.add('is-clipped');
         $target.classList.add('is-active');
       });
@@ -76,15 +76,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if ($modalCloses.length > 0) {
-    $modalCloses.forEach($el => {
-      $el.addEventListener('click', () => {
+    $modalCloses.forEach(function ($el) {
+      $el.addEventListener('click', function () {
         closeModals();
       });
     });
   }
 
-  document.addEventListener('keydown', event => {
-    const e = event || window.event;
+  document.addEventListener('keydown', function (event) {
+    var e = event || window.event;
     if (e.keyCode === 27) {
       closeModals();
       closeDropdowns();
@@ -93,24 +93,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function closeModals() {
     $html.classList.remove('is-clipped');
-    $modals.forEach($el => {
+    $modals.forEach(function ($el) {
       $el.classList.remove('is-active');
     });
   }
 
   // Clipboard
 
-  const $highlights = getAll('.highlight');
-  let itemsProcessed = 0;
+  var $highlights = getAll('.highlight');
+  var itemsProcessed = 0;
 
   if ($highlights.length > 0) {
-    $highlights.forEach($el => {
-      const copy = '<button class="copy">Copy</button>';
-      const expand = '<button class="expand">Expand</button>';
-      $el.insertAdjacentHTML('beforeend', copy);
+    $highlights.forEach(function ($el) {
+      var copyEl = '<button class="button is-small bd-copy">Copy</button>';
+      var expandEl = '<button class="button is-small bd-expand">Expand</button>';
+      $el.insertAdjacentHTML('beforeend', copyEl);
 
-      if ($el.firstElementChild.scrollHeight > 480 && $el.firstElementChild.clientHeight <= 480) {
-        $el.insertAdjacentHTML('beforeend', expand);
+      var $parent = $el.parentNode;
+      if ($parent && $parent.classList.contains('bd-is-more')) {
+        var showEl = '<button class="bd-show"><div><span class="icon"><i class="fa fa-code"></i></span> <strong>Show code</strong></div></button>';
+        $el.insertAdjacentHTML('beforeend', showEl);
+      } else if ($el.firstElementChild.scrollHeight > 480 && $el.firstElementChild.clientHeight <= 480) {
+        $el.insertAdjacentHTML('beforeend', expandEl);
       }
 
       itemsProcessed++;
@@ -121,34 +125,34 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function addHighlightControls() {
-    const $highlightButtons = getAll('.highlight .copy, .highlight .expand');
+    var $highlightButtons = getAll('.highlight .bd-copy, .highlight .bd-expand');
 
-    $highlightButtons.forEach($el => {
-      $el.addEventListener('mouseenter', () => {
-        $el.parentNode.style.boxShadow = '0 0 0 1px #ed6c63';
+    $highlightButtons.forEach(function ($el) {
+      $el.addEventListener('mouseenter', function () {
+        $el.parentNode.classList.add('bd-is-hovering');
       });
 
-      $el.addEventListener('mouseleave', () => {
-        $el.parentNode.style.boxShadow = 'none';
+      $el.addEventListener('mouseleave', function () {
+        $el.parentNode.classList.remove('bd-is-hovering');
       });
     });
 
-    const $highlightExpands = getAll('.highlight .expand');
+    var $highlightExpands = getAll('.highlight .bd-expand');
 
-    $highlightExpands.forEach($el => {
-      $el.addEventListener('click', () => {
+    $highlightExpands.forEach(function ($el) {
+      $el.addEventListener('click', function () {
         $el.parentNode.firstElementChild.style.maxHeight = 'none';
       });
     });
-  }
 
-  /*
-  new Clipboard('.copy', {
-    target: function(trigger) {
-      return trigger.previousSibling;
-    }
-  });
-  */
+    var $highlightShows = getAll('.highlight .bd-show');
+
+    $highlightShows.forEach(function ($el) {
+      $el.addEventListener('click', function () {
+        $el.parentNode.parentNode.classList.remove('bd-is-more-clipped');
+      });
+    });
+  }
 
   // Functions
 
@@ -156,14 +160,13 @@ document.addEventListener('DOMContentLoaded', () => {
     return Array.prototype.slice.call(document.querySelectorAll(selector), 0);
   }
 
-  let latestKnownScrollY = 0;
-  let ticking = false;
+  var latestKnownScrollY = 0;
+  var ticking = false;
 
   function scrollUpdate() {
     ticking = false;
     // do stuff
   }
-
 
   function onScroll() {
     latestKnownScrollY = window.scrollY;
@@ -171,12 +174,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function scrollRequestTick() {
-    if(!ticking) {
+    if (!ticking) {
       requestAnimationFrame(scrollUpdate);
     }
     ticking = true;
   }
 
-   window.addEventListener('scroll', onScroll, false);
-
+  window.addEventListener('scroll', onScroll, false);
 });
