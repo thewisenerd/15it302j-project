@@ -1,0 +1,97 @@
+extends layout
+
+mixin postcard(article)
+  div.card.is-fullwidth
+    .card-content
+      .media
+        .media-left
+          figure.image.is-48x48
+            img(src='/api/avatar/' + article.author, alt=article.author)
+        .media-content
+          p.title.is-4= article.title
+          p.subtitle.is-6= '@' + article.author + ' in ' + article.category
+      span !{article.text}
+
+    .card-footer
+      span.card-footer-item= article.daterel
+      span.card-footer-item= article.commentcount + ' comments'
+      span.card-footer-item
+        a(href='/article/' + article.articleid, target='_blank') Read More &gt;
+
+mixin makemedia(comment)
+  article.media
+    .media-left
+      figure.image.is-32x32
+        img(src='/api/avatar/' + comment.author, alt=comment.author)
+    .media-content
+      .content
+        p
+          small @#{comment.author} - #{comment.daterel}
+          br
+          span= comment.message
+      nav.level
+        .level-left
+          if comment.author == user.username
+            button.level-item.button.is-small.btn-reply.edit-comment(data-comment=comment.message, onclick="window.COMMENT.edit("+article.articleid+","+comment.commentid+", this)") #[span.icon.is-small #[i.fa.fa-edit] ] #[span Edit]
+          else
+            button.level-item.button.is-small.btn-reply.reply-to-comment(onclick="window.COMMENT.reply("+article.articleid+","+comment.commentid+")") #[span.icon.is-small #[i.fa.fa-reply] ] #[span Reply]
+      if (comment.children)
+        +buildtree(comment.children, 1)
+
+mixin buildtree(comments, nested)
+  each comment in comments
+    if nested == 0
+      .box
+        +makemedia(comment)
+    else
+      +makemedia(comment)
+
+block page-js
+  script(type='text/javascript' src='/js/jquery-3.2.1.min.js')
+
+block page-scripts
+  script(type="text/javascript").
+    window.KEY = "#{user.key}";
+  script(src='/js/article.js')
+
+block content
+  section.hero.is-light
+    .hero-head
+      include includes/header.pug
+
+  section.hero.is-fullheight
+    .hero-body
+      .container
+        .card
+          .card-content
+            h1.title.is-3= article.title
+        .card
+          .card-content
+            h3.subtitle.is-5
+              | Posted #{article.daterel} in #[strong #{article.category}] by #[strong #{article.author}]
+        .card
+          .card-content !{article.html}
+
+        br
+        .card
+          .card-content
+            .media
+              .media-left
+                figure.image.is-64x64
+                  img(src='/api/avatar/' + article.author, alt=article.author)
+              .media-content
+                p.subtitle.is-6 @#{article.author}
+                p.title.is-4 #{author.name}
+                p !{author.desc}
+
+        br
+        .card
+          .card-content
+            div.comment.pad-little
+              h1.title.is-5 comments
+            div.comment.pad-little
+              button.button.is-small#post-new-comment(data-articleid=article.articleid, onclick="window.COMMENT.new("+article.articleid+")") #[span.icon.is-small #[i.fa.fa-reply] ] #[span Post New Comment]
+            div.comment.pad-little
+              +buildtree(comments, 0)
+
+  include includes/footer.pug

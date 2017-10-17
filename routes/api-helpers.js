@@ -1,5 +1,6 @@
 var bcrypt = require('bcrypt')
 var mysql = require('mysql')
+var moment = require('moment')
 
 var config = require('../config')
 var pool = require('../mysql-wrapper');
@@ -193,6 +194,7 @@ module.exports.buildcommentthread = function(articleid, commentid = null, callba
         if (comment.parent == parent) {
           comment['children'] = {};
           tree[comment.commentid] = comment;
+          tree[comment.commentid]['daterel'] = moment(tree[comment.commentid].date).fromNow();
         } else {
           orphans.push(comment);
         }

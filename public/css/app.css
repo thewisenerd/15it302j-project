@@ -17,7 +17,11 @@ body, html {
   background-color: rgba(0, 0, 0, 0.9);
   color: #fff; }
 
-.article-card {
-  width: 100%; }
+.comment.pad-little {
+  padding-top: 0.2rem;
+  padding-bottom: 0.2rem; }
+
+a.btn-reply {
+  margin-bottom: 0.2rem; }
 
 /*# sourceMappingURL=app.css.map */
