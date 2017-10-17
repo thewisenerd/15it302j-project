@@ -2,6 +2,8 @@
 
 # deps:
 # curl https://getcaddy.com | bash -s personal
+# node; v8.6.0
+# mysql; 10.1.28-MariaDB
 
 set -euo pipefail
 
