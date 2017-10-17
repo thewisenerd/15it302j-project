@@ -1,21 +1,23 @@
-nav.navbar.is-transparent
-  .container
+.container
+  nav.navbar.is-light
     .navbar-brand
-      a.navbar-item(href='/')
-        img(src='/assets/writr.svg' alt='logo' height="28px" width="auto" style="padding-right:1em;")
-        b.is-strong.is-dark Writr
+      a.navbar-item.level(href='/')
+        .level-item
+          img(src='/assets/writr.svg' alt='logo' height="auto" width="28px" style="margin-right: 1rem;")
+        .level-item
+          b.is-strong.is-dark Writr
     .navbar-menu
       .navbar-end
         if header.read
-          a.nav-item.is-active(href="/") #[span.icon #[i.fa.fa-book]] Read
+          a.navbar-item.is-active(href="/") #[span.icon #[i.fa.fa-book]] Read
         else
-          a.nav-item(href="/") #[span.icon #[i.fa.fa-book]] Read
+          a.navbar-item(href="/") #[span.icon #[i.fa.fa-book]] Read
         if header.edit
-          a.nav-item.is-active(href="/edit") #[span.icon #[i.fa.fa-edit]] Edit
+          a.navbar-item.is-active(href="/edit") #[span.icon #[i.fa.fa-edit]] Edit
         else
-          a.nav-item(href="/edit") #[span.icon #[i.fa.fa-edit]] Edit
+          a.navbar-item(href="/edit") #[span.icon #[i.fa.fa-edit]] Edit
         if header.write
-          a.nav-item.is-active(href="/write") #[span.icon #[i.fa.fa-pencil]] Write
+          a.navbar-item.is-active(href="/write") #[span.icon #[i.fa.fa-pencil]] Write
         else
-          a.nav-item(href="/write") #[span.icon #[i.fa.fa-pencil]] Write
-        a.nav-item(href="/logout") #[span.icon #[i.fa.fa-sign-out]] Logout
+          a.navbar-item(href="/write") #[span.icon #[i.fa.fa-pencil]] Write
+        a.navbar-item(href="/logout") #[span.icon #[i.fa.fa-sign-out]] Logout

@@ -8,19 +8,6 @@ body,html {
 	background-color: #f5f5f5;
 }
 
-.navbar {
-	&.is-transparent {
-		background-color: transparent;
-	}
-}
-
-.hero.is-light {
-	a.navbar-item:hover, a.nav-item:hover, a.navbar-item.is-active, a.nav-item.is-active {
-		background-color: rgba(0,0,0,0.9);
-		color: #fff;
-	}
-}
-
 .comment.pad-little{
 	padding-top: 0.2rem;
 	padding-bottom: 0.2rem;
