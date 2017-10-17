@@ -29,7 +29,10 @@ var checkauth = (req, res, next) => {
     req.path === '/auth' ||      // auth access
     req.path === '/signup' ||    // new signup
     req.path === '/logout' ||    // logout
-    req.path.startsWith("/api/") // api access
+    req.path.startsWith("/api/") || // api access
+    req.path.startsWith("/assets/") || // assets access
+    req.path.startsWith("/css/") || // css access
+    req.path.startsWith("/js/") // js access
   ) {
 
     /* if key is set */
