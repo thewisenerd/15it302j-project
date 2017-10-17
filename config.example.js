@@ -1,6 +1,6 @@
 module.exports.db = {
   connectionLimit: 1000,
-  rounds: 512
+  rounds: 10
 };
 
 module.exports.e = {
