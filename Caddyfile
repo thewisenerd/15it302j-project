@@ -1,0 +1,3 @@
+*:80 {
+	proxy / localhost:3000
+}
