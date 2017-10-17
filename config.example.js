@@ -1,10 +1,8 @@
-/* modify this */
 module.exports.db = {
   connectionLimit: 1000,
   rounds: 512
 };
 
-/* do not modify after this line */
 module.exports.e = {
   E_OK: [0, "ok."],
   E_WRONG_PARAMETERS: [1, "wrong parameters."],
@@ -22,5 +20,10 @@ module.exports.db['tables'] = {
   "articles": "writr_articles",
   "categories": "writr_categories",
   "featured": "writr_featured",
-  "comments": "writr_comments"
+  "comments": "writr_comments",
+};
+
+module.exports.db['views'] = {
+  "articles": "writr_view_articles",
+  "featured": "writr_view_featured",
 };
